@@ -44,7 +44,15 @@ lazy val root = (project in file(".") withId "mazeboard")
     publish := {},
     publishLocal := {}
   )
-  .aggregate(configReader, jsonReader, objectReader, sparkUtils)
+  .aggregate(configReader, jsonReader, objectReader, sparkUtils)//, examples)
+
+/*lazy val examples = (project in file("examples"))
+  .dependsOn(objectReader, sparkUtils)
+  .configs(IntegrationTest)
+  .settings(
+    name := "examples",
+    libraryDependencies += "com.github.pureconfig" %% "pureconfig" % "0.10.1"
+  )*/
 
 lazy val jsonReader = (project in file("json-reader"))
   .dependsOn(objectReader)
