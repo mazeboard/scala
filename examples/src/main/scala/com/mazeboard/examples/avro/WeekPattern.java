@@ -1,8 +1,8 @@
-package com.carrefour.phenix.spark.utils;
+package com.mazeboard.examples.avro;
 
 public class WeekPattern extends org.apache.avro.specific.SpecificRecordBase implements org.apache.avro.specific.SpecificRecord {
     public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse(
-            "{\"type\":\"record\",\"name\":\"WeekPattern\",\"namespace\":\"com.carrefour.phenix.spark.utils\",\"doc\":\"Pattern for the week\",\"fields\":[" +
+            "{\"type\":\"record\",\"name\":\"WeekPattern\",\"namespace\":\"com.mazeboard.examples.avro\",\"doc\":\"Pattern for the week\",\"fields\":[" +
                     "{\"name\":\"patternId\",\"type\":[\"null\",\"int\"],\"doc\":\"Identifier of the pattern\",\"default\":null}," +
                     "{\"name\":\"begDate\",\"type\":[\"null\",{\"type\":\"string\",\"avro.java.string\":\"String\"}],\"doc\":\"Start date\",\"default\":null}," +
                     "{\"name\":\"endDate\",\"type\":[\"null\",{\"type\":\"string\",\"avro.java.string\":\"String\"}],\"doc\":\"End Date\",\"default\":null}]}");
@@ -97,18 +97,18 @@ public class WeekPattern extends org.apache.avro.specific.SpecificRecordBase imp
     }
 
     /** Creates a new WeekPattern RecordBuilder */
-    public static com.carrefour.phenix.spark.utils.WeekPattern.Builder newBuilder() {
-        return new com.carrefour.phenix.spark.utils.WeekPattern.Builder();
+    public static com.mazeboard.examples.avro.WeekPattern.Builder newBuilder() {
+        return new com.mazeboard.examples.avro.WeekPattern.Builder();
     }
 
     /** Creates a new WeekPattern RecordBuilder by copying an existing Builder */
-    public static com.carrefour.phenix.spark.utils.WeekPattern.Builder newBuilder(com.carrefour.phenix.spark.utils.WeekPattern.Builder other) {
-        return new com.carrefour.phenix.spark.utils.WeekPattern.Builder(other);
+    public static com.mazeboard.examples.avro.WeekPattern.Builder newBuilder(com.mazeboard.examples.avro.WeekPattern.Builder other) {
+        return new com.mazeboard.examples.avro.WeekPattern.Builder(other);
     }
 
     /** Creates a new WeekPattern RecordBuilder by copying an existing WeekPattern instance */
-    public static com.carrefour.phenix.spark.utils.WeekPattern.Builder newBuilder(com.carrefour.phenix.spark.utils.WeekPattern other) {
-        return new com.carrefour.phenix.spark.utils.WeekPattern.Builder(other);
+    public static com.mazeboard.examples.avro.WeekPattern.Builder newBuilder(com.mazeboard.examples.avro.WeekPattern other) {
+        return new com.mazeboard.examples.avro.WeekPattern.Builder(other);
     }
 
     /**
@@ -123,11 +123,11 @@ public class WeekPattern extends org.apache.avro.specific.SpecificRecordBase imp
 
         /** Creates a new Builder */
         private Builder() {
-            super(com.carrefour.phenix.spark.utils.WeekPattern.SCHEMA$);
+            super(com.mazeboard.examples.avro.WeekPattern.SCHEMA$);
         }
 
         /** Creates a Builder by copying an existing Builder */
-        private Builder(com.carrefour.phenix.spark.utils.WeekPattern.Builder other) {
+        private Builder(com.mazeboard.examples.avro.WeekPattern.Builder other) {
             super(other);
             if (isValidValue(fields()[0], other.patternId)) {
                 this.patternId = data().deepCopy(fields()[0].schema(), other.patternId);
@@ -144,8 +144,8 @@ public class WeekPattern extends org.apache.avro.specific.SpecificRecordBase imp
         }
 
         /** Creates a Builder by copying an existing WeekPattern instance */
-        private Builder(com.carrefour.phenix.spark.utils.WeekPattern other) {
-            super(com.carrefour.phenix.spark.utils.WeekPattern.SCHEMA$);
+        private Builder(com.mazeboard.examples.avro.WeekPattern other) {
+            super(com.mazeboard.examples.avro.WeekPattern.SCHEMA$);
             if (isValidValue(fields()[0], other.patternId)) {
                 this.patternId = data().deepCopy(fields()[0].schema(), other.patternId);
                 fieldSetFlags()[0] = true;
@@ -166,7 +166,7 @@ public class WeekPattern extends org.apache.avro.specific.SpecificRecordBase imp
         }
 
         /** Sets the value of the 'patternId' field */
-        public com.carrefour.phenix.spark.utils.WeekPattern.Builder setPatternId(java.lang.Integer value) {
+        public com.mazeboard.examples.avro.WeekPattern.Builder setPatternId(java.lang.Integer value) {
             validate(fields()[0], value);
             this.patternId = value;
             fieldSetFlags()[0] = true;
@@ -179,7 +179,7 @@ public class WeekPattern extends org.apache.avro.specific.SpecificRecordBase imp
         }
 
         /** Clears the value of the 'patternId' field */
-        public com.carrefour.phenix.spark.utils.WeekPattern.Builder clearPatternId() {
+        public com.mazeboard.examples.avro.WeekPattern.Builder clearPatternId() {
             patternId = null;
             fieldSetFlags()[0] = false;
             return this;
@@ -191,7 +191,7 @@ public class WeekPattern extends org.apache.avro.specific.SpecificRecordBase imp
         }
 
         /** Sets the value of the 'begDate' field */
-        public com.carrefour.phenix.spark.utils.WeekPattern.Builder setBegDate(java.lang.String value) {
+        public com.mazeboard.examples.avro.WeekPattern.Builder setBegDate(java.lang.String value) {
             validate(fields()[1], value);
             this.begDate = value;
             fieldSetFlags()[1] = true;
@@ -204,7 +204,7 @@ public class WeekPattern extends org.apache.avro.specific.SpecificRecordBase imp
         }
 
         /** Clears the value of the 'begDate' field */
-        public com.carrefour.phenix.spark.utils.WeekPattern.Builder clearBegDate() {
+        public com.mazeboard.examples.avro.WeekPattern.Builder clearBegDate() {
             begDate = null;
             fieldSetFlags()[1] = false;
             return this;
@@ -216,7 +216,7 @@ public class WeekPattern extends org.apache.avro.specific.SpecificRecordBase imp
         }
 
         /** Sets the value of the 'endDate' field */
-        public com.carrefour.phenix.spark.utils.WeekPattern.Builder setEndDate(java.lang.String value) {
+        public com.mazeboard.examples.avro.WeekPattern.Builder setEndDate(java.lang.String value) {
             validate(fields()[2], value);
             this.endDate = value;
             fieldSetFlags()[2] = true;
@@ -229,7 +229,7 @@ public class WeekPattern extends org.apache.avro.specific.SpecificRecordBase imp
         }
 
         /** Clears the value of the 'endDate' field */
-        public com.carrefour.phenix.spark.utils.WeekPattern.Builder clearEndDate() {
+        public com.mazeboard.examples.avro.WeekPattern.Builder clearEndDate() {
             endDate = null;
             fieldSetFlags()[2] = false;
             return this;

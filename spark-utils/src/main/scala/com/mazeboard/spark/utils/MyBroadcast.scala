@@ -1,4 +1,4 @@
-package com.carrefour.phenix.spark.utils
+package com.mazeboard.spark.utils
 
 import java.util.{ Timer, TimerTask }
 import org.apache.spark.broadcast.Broadcast

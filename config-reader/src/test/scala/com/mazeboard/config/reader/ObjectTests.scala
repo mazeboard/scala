@@ -76,9 +76,6 @@ object ObjectTests {
     count: Long,
     counts: List[Long])
 
-  // if default value is provided, then
-  // new ConfigReader("{spark.master: local, spark.app.name: test}")[MySparkConf] will create MySparkConf with the default
-  // value of sparkConf
   class MySparkConf(sparkConf: Map[String, String])
     extends SparkConf(false) {
     assert(sparkConf.contains("spark.app.name"))

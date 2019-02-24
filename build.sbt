@@ -44,21 +44,20 @@ lazy val root = (project in file(".") withId "mazeboard")
     publish := {},
     publishLocal := {}
   )
-  .aggregate(configReader, jsonReader, objectReader, sparkUtils)//, examples)
+  .aggregate(configReader, jsonReader, objectReader, sparkUtils, examples)
 
-/*lazy val examples = (project in file("examples"))
-  .dependsOn(objectReader, sparkUtils)
+lazy val examples = (project in file("examples"))
+  .dependsOn(configReader, sparkUtils)
   .configs(IntegrationTest)
   .settings(
     name := "examples",
-    libraryDependencies += "com.github.pureconfig" %% "pureconfig" % "0.10.1"
-  )*/
+    libraryDependencies += "org.apache.kafka" % "kafka-streams" % "2.1.1" withSources() withJavadoc(),
+    libraryDependencies += "org.apache.kafka" %% "kafka-streams-scala" % "2.1.1" withSources() withJavadoc())
 
 lazy val jsonReader = (project in file("json-reader"))
   .dependsOn(objectReader)
   .settings(
     name := "json-reader", 
-    libraryDependencies += "com.fasterxml.jackson.datatype" % "jackson-datatype-json-org" % "2.9.8",
     libraryDependencies += "org.json" % "json" % "20180813",
     libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % Test
   )
@@ -68,7 +67,7 @@ lazy val configReader = (project in file("config-reader"))
   .settings(
     name := "config-reader",
     libraryDependencies += "com.typesafe" % "config" % "1.3.3",
-    libraryDependencies += "org.apache.spark" %% "spark-core" % "2.4.0",
+    libraryDependencies += "org.apache.spark" %% "spark-core" % "2.4.0" % Test withSources() withJavadoc(),
     libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % Test
   )
 
@@ -82,7 +81,7 @@ lazy val objectReader = (project in file("object-reader"))
 lazy val sparkUtils = (project in file("spark-utils"))
   .settings(
     libraryDependencies += "org.scala-lang" % "scala-reflect" % scalaVersion.value,
-    libraryDependencies += "org.apache.spark" %% "spark-sql" % "2.4.0",
+    libraryDependencies += "org.apache.spark" %% "spark-sql" % "2.4.0" withSources() withJavadoc(),
     libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % Test,
     libraryDependencies += "com.typesafe" % "config" % "1.3.3"
   )

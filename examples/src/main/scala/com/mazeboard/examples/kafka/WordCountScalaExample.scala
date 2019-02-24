@@ -1,4 +1,4 @@
-package com.mazeboard.kafka
+package com.mazeboard.examples.kafka
 
 import java.util.Properties
 import java.util.concurrent.TimeUnit
