@@ -19,31 +19,6 @@ class ConfigReaderSpec
   }
 
   def testConfigReader() = {
-    val confString =
-      """{
-             port = 8080
-             map {
-                foo = "bar"
-                zoo = "dar"}
-             maplistbytes {
-                 foo = ["1k", "2k"]
-                 bar = ["3k", "4k"]}
-             sparkConf {
-                 spark.master = "loacl[*]"
-                 spark.app.name = "mySpark"}
-             mySparkConf = ${sparkConf}
-             adtlist = [${adtmap.adt1}]
-             adtmap {
-                  adt1 {
-                    type = "adta"
-                    b = 5
-                    bytes = "3k"
-                    durations = [ "1ms", "1s", "1h" ]
-                    map = {u:foo, v:bar}
-                    count = 2
-                    counts = [15, 23]}
-                 adt2 = ${adtmap.adt1}}}
-              """
 
     assert(configFromString("{x: foo}")[Foo] == Foo(3))
 
@@ -82,7 +57,30 @@ class ConfigReaderSpec
 
     val myTest = MyTest("adta", 5, 3072L.asInstanceOf[Bytes], Some(List(1L.asInstanceOf[DurationMilliSeconds], 1000L.asInstanceOf[DurationMilliSeconds], 3600000L.asInstanceOf[DurationMilliSeconds])), 100, Map("u" -> "foo", "v" -> "bar"), None, 2, List(15, 23))
 
-    assert(configFromString(confString)[Test] == Test(
+    assert(configFromString("""{
+             port = 8080
+             map {
+                foo = "bar"
+                zoo = "dar"}
+             maplistbytes {
+                 foo = ["1k", "2k"]
+                 bar = ["3k", "4k"]}
+             sparkConf {
+                 spark.master = "loacl[*]"
+                 spark.app.name = "mySpark"}
+             mySparkConf = ${sparkConf}
+             adtlist = [${adtmap.adt1}]
+             adtmap {
+                  adt1 {
+                    type = "adta"
+                    b = 5
+                    bytes = "3k"
+                    durations = [ "1ms", "1s", "1h" ]
+                    map = {u:foo, v:bar}
+                    count = 2
+                    counts = [15, 23]}
+                 adt2 = ${adtmap.adt1}}}
+              """)[Test] == Test(
       Some(Port(8080)),
       Map("zoo" -> "dar", "foo" -> "bar"),
       Map(

@@ -1,4 +1,4 @@
-package com.carrefour.phenix.spark.utils
+package com.mazeboard.spark.utils
 
 import org.scalatest.{ FlatSpec, Matchers }
 

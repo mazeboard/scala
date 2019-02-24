@@ -1,4 +1,4 @@
-package com.carrefour.phenix.spark.utils
+package com.mazeboard.spark.utils
 
 import org.apache.spark.sql._
 import scala.reflect.api
