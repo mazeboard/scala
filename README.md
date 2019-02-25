@@ -63,7 +63,7 @@ not know how to get the type tag of the reader object and to create a new instan
 
 ## config-reader
 
-Like PureConfig, config-reader loads Typesafe Config configurations.
+Like [PureConfig](https://github.com/pureconfig/pureconfig), config-reader loads Typesafe Config configurations.
 
 Compared to PureConfig, config-reader has less boilerplate with a simple implementation based on object-reader.
 
