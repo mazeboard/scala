@@ -1,34 +1,34 @@
-package com.mazeboard.examples.avro;
+package com.mazeboard.tests.avro;
 
 public class Store extends org.apache.avro.specific.SpecificRecordBase implements org.apache.avro.specific.SpecificRecord {
     public static final org.apache.avro.Schema SCHEMA$ =
             new org.apache.avro.Schema.Parser().parse(
-                    "{\"type\":\"record\",\"name\":\"Store\",\"namespace\":\"com.mazeboard.examples.avro\",\"doc\":\"Store Pivot containing all information at stoEan level\",\"fields\":[" +
+                    "{\"type\":\"record\",\"name\":\"Store\",\"namespace\":\"com.mazeboard.tests.avro\",\"doc\":\"Store Pivot containing all information at stoEan level\",\"fields\":[" +
                             "{\"name\":\"stoEan\",\"type\":[\"null\",{\"type\":\"string\",\"avro.java.string\":\"String\"}],\"doc\":\"Store EAN GLN\",\"default\":null}," +
                             "{\"name\":\"stoAnabelKey\",\"type\":[\"null\",{\"type\":\"string\",\"avro.java.string\":\"String\"}],\"doc\":\"Store Anabel Key\",\"default\":null}," +
                             "{\"name\":\"weekPattern\",\"type\":[\"null\"," +
-                            "{\"type\":\"record\",\"name\":\"WeekPattern\",\"namespace\":\"com.mazeboard.examples.avro\",\"doc\":\"Pattern for the week\",\"fields\":[" +
+                            "{\"type\":\"record\",\"name\":\"WeekPattern\",\"namespace\":\"com.mazeboard.tests.avro\",\"doc\":\"Pattern for the week\",\"fields\":[" +
                             "{\"name\":\"patternId\",\"type\":[\"null\",\"int\"],\"doc\":\"Identifier of the pattern\",\"default\":null}," +
                             "{\"name\":\"begDate\",\"type\":[\"null\",{\"type\":\"string\",\"avro.java.string\":\"String\"}],\"doc\":\"Start date\",\"default\":null}," +
                             "{\"name\":\"endDate\",\"type\":[\"null\",{\"type\":\"string\",\"avro.java.string\":\"String\"}]}" +
                             "]}]}]}");
     public static org.apache.avro.Schema getClassSchema() { return SCHEMA$; }
-    @Deprecated public java.lang.String stoEan;
-    @Deprecated public java.lang.String stoAnabelKey;
-    @Deprecated public com.mazeboard.examples.avro.WeekPattern weekPattern;
+    @Deprecated public String stoEan;
+    @Deprecated public String stoAnabelKey;
+    @Deprecated public WeekPattern weekPattern;
     public Store() {}
 
     /**
      * All-args constructor.
      */
-    public Store(java.lang.String stoEan, java.lang.String stoAnabelKey, com.mazeboard.examples.avro.WeekPattern weekPattern) {
+    public Store(String stoEan, String stoAnabelKey, WeekPattern weekPattern) {
         this.stoEan = stoEan;
         this.stoAnabelKey = stoAnabelKey;
         this.weekPattern = weekPattern;
     }
 
     public org.apache.avro.Schema getSchema() { return SCHEMA$; }
-    public java.lang.Object get(int field$) {
+    public Object get(int field$) {
         switch (field$) {
             case 0: return stoEan;
             case 1: return stoAnabelKey;
@@ -37,66 +37,66 @@ public class Store extends org.apache.avro.specific.SpecificRecordBase implement
         }
     }
 
-    public void put(int field$, java.lang.Object value$) {
+    public void put(int field$, Object value$) {
         switch (field$) {
-            case 0: stoEan = (java.lang.String)value$; break;
-            case 1: stoAnabelKey = (java.lang.String)value$; break;
-            case 2: weekPattern = (com.mazeboard.examples.avro.WeekPattern)value$; break;
+            case 0: stoEan = (String)value$; break;
+            case 1: stoAnabelKey = (String)value$; break;
+            case 2: weekPattern = (WeekPattern)value$; break;
             default: throw new org.apache.avro.AvroRuntimeException("Bad index");
         }
     }
 
-    public java.lang.String getStoEan() {
+    public String getStoEan() {
         return stoEan;
     }
 
-    public void setStoEan(java.lang.String value) {
+    public void setStoEan(String value) {
         this.stoEan = value;
     }
 
-    public java.lang.String getStoAnabelKey() {
+    public String getStoAnabelKey() {
         return stoAnabelKey;
     }
 
-    public void setStoAnabelKey(java.lang.String value) { this.stoAnabelKey = value; }
+    public void setStoAnabelKey(String value) { this.stoAnabelKey = value; }
 
-    public com.mazeboard.examples.avro.WeekPattern getWeekPattern() {
+    public WeekPattern getWeekPattern() {
         return weekPattern;
     }
 
-    public void setWeekPattern(com.mazeboard.examples.avro.WeekPattern value) {
+    public void setWeekPattern(WeekPattern value) {
         this.weekPattern = value;
     }
 
-    public static com.mazeboard.examples.avro.Store.Builder newBuilder() {
-        return new com.mazeboard.examples.avro.Store.Builder();
+    public static Builder newBuilder() {
+        return new Builder();
     }
 
     /** Creates a new Store RecordBuilder by copying an existing Builder */
-    public static com.mazeboard.examples.avro.Store.Builder newBuilder(com.mazeboard.examples.avro.Store.Builder other) {
-        return new com.mazeboard.examples.avro.Store.Builder(other);
+    public static Builder newBuilder(Builder other) {
+        return new Builder(other);
     }
 
     /** Creates a new Store RecordBuilder by copying an existing Store instance */
-    public static com.mazeboard.examples.avro.Store.Builder newBuilder(com.mazeboard.examples.avro.Store other) {
-        return new com.mazeboard.examples.avro.Store.Builder(other);
+    public static Builder newBuilder(Store other) {
+        return new Builder(other);
     }
 
     /**
      * RecordBuilder for Store instances.
      */
-    public static class Builder extends org.apache.avro.specific.SpecificRecordBuilderBase<com.mazeboard.examples.avro.Store>
-            implements org.apache.avro.data.RecordBuilder<com.mazeboard.examples.avro.Store> {
+    public static class Builder extends org.apache.avro.specific.SpecificRecordBuilderBase<Store>
+            implements org.apache.avro.data.RecordBuilder<Store> {
 
-        private java.lang.String stoEan;
-        private java.lang.String stoAnabelKey;
-        private com.mazeboard.examples.avro.WeekPattern weekPattern;
+        private String stoEan;
+        private String stoAnabelKey;
+        private WeekPattern weekPattern;
         private Builder() {
-            super(com.mazeboard.examples.avro.Store.SCHEMA$);
+            super(Store.SCHEMA$);
         }
 
         /** Creates a Builder by copying an existing Builder */
-        private Builder(com.mazeboard.examples.avro.Store.Builder other) {
+        private Builder(Builder other) {
             super(other);
             if (isValidValue(fields()[0], other.stoEan)) {
                 this.stoEan = data().deepCopy(fields()[0].schema(), other.stoEan);
@@ -113,8 +113,8 @@ public class Store extends org.apache.avro.specific.SpecificRecordBase implement
         }
 
         /** Creates a Builder by copying an existing Store instance */
-        private Builder(com.mazeboard.examples.avro.Store other) {
-            super(com.mazeboard.examples.avro.Store.SCHEMA$);
+        private Builder(Store other) {
+            super(Store.SCHEMA$);
             if (isValidValue(fields()[0], other.stoEan)) {
                 this.stoEan = data().deepCopy(fields()[0].schema(), other.stoEan);
                 fieldSetFlags()[0] = true;
@@ -130,12 +130,12 @@ public class Store extends org.apache.avro.specific.SpecificRecordBase implement
         }
 
         /** Gets the value of the 'stoEan' field */
-        public java.lang.String getStoEan() {
+        public String getStoEan() {
             return stoEan;
         }
 
         /** Sets the value of the 'stoEan' field */
-        public com.mazeboard.examples.avro.Store.Builder setStoEan(java.lang.String value) {
+        public Builder setStoEan(String value) {
             validate(fields()[0], value);
             this.stoEan = value;
             fieldSetFlags()[0] = true;
@@ -148,19 +148,19 @@ public class Store extends org.apache.avro.specific.SpecificRecordBase implement
         }
 
         /** Clears the value of the 'stoEan' field */
-        public com.mazeboard.examples.avro.Store.Builder clearStoEan() {
+        public Builder clearStoEan() {
             stoEan = null;
             fieldSetFlags()[0] = false;
             return this;
         }
 
         /** Gets the value of the 'stoAnabelKey' field */
-        public java.lang.String getStoAnabelKey() {
+        public String getStoAnabelKey() {
             return stoAnabelKey;
         }
 
         /** Sets the value of the 'stoAnabelKey' field */
-        public com.mazeboard.examples.avro.Store.Builder setStoAnabelKey(java.lang.String value) {
+        public Builder setStoAnabelKey(String value) {
             validate(fields()[1], value);
             this.stoAnabelKey = value;
             fieldSetFlags()[1] = true;
@@ -173,19 +173,19 @@ public class Store extends org.apache.avro.specific.SpecificRecordBase implement
         }
 
         /** Clears the value of the 'stoAnabelKey' field */
-        public com.mazeboard.examples.avro.Store.Builder clearStoAnabelKey() {
+        public Builder clearStoAnabelKey() {
             stoAnabelKey = null;
             fieldSetFlags()[1] = false;
             return this;
         }
 
         /** Gets the value of the 'weekPattern' field */
-        public com.mazeboard.examples.avro.WeekPattern getWeekPattern() {
+        public WeekPattern getWeekPattern() {
             return weekPattern;
         }
 
         /** Sets the value of the 'weekPattern' field */
-        public com.mazeboard.examples.avro.Store.Builder setWeekPattern(com.mazeboard.examples.avro.WeekPattern value) {
+        public Builder setWeekPattern(WeekPattern value) {
             validate(fields()[2], value);
             this.weekPattern = value;
             fieldSetFlags()[2] = true;
@@ -198,19 +198,19 @@ public class Store extends org.apache.avro.specific.SpecificRecordBase implement
         }
 
         /** Clears the value of the 'weekPattern' field */
-        public com.mazeboard.examples.avro.Store.Builder clearWeekPattern() {
+        public Builder clearWeekPattern() {
             weekPattern = null;
             fieldSetFlags()[2] = false;
             return this;
         }
 
         @Override
-        public com.mazeboard.examples.avro.Store build() {
+        public Store build() {
             try {
-                com.mazeboard.examples.avro.Store record = new com.mazeboard.examples.avro.Store();
-                record.stoEan = fieldSetFlags()[0] ? this.stoEan : (java.lang.String) defaultValue(fields()[0]);
-                record.stoAnabelKey = fieldSetFlags()[1] ? this.stoAnabelKey : (java.lang.String) defaultValue(fields()[1]);
-                record.weekPattern = fieldSetFlags()[2] ? this.weekPattern : (com.mazeboard.examples.avro.WeekPattern) defaultValue(fields()[2]);
+                Store record = new Store();
+                record.stoEan = fieldSetFlags()[0] ? this.stoEan : (String) defaultValue(fields()[0]);
+                record.stoAnabelKey = fieldSetFlags()[1] ? this.stoAnabelKey : (String) defaultValue(fields()[1]);
+                record.weekPattern = fieldSetFlags()[2] ? this.weekPattern : (WeekPattern) defaultValue(fields()[2]);
                return record;
             } catch (Exception e) {
                 throw new org.apache.avro.AvroRuntimeException(e);

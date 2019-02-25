@@ -4,6 +4,7 @@ import org.apache.spark.SparkConf
 import org.apache.spark.sql._
 import org.apache.spark.sql.types._
 import com.typesafe.config.ConfigFactory
+import com.mazeboard.config.reader.ConfigReader
 import org.scalatest._
 
 class DFSupportSpec extends FlatSpec with Matchers {
@@ -12,11 +13,16 @@ class DFSupportSpec extends FlatSpec with Matchers {
 
   System.setSecurityManager(null)
 
-  val config = ConfigFactory.load()
-  val conf = config.getConfig("phenix.sparkConf").entrySet().asScala
-    .map(e ⇒ (e.getKey, e.getValue.unwrapped().toString)).toMap
+  val sparkConf = new ConfigReader(ConfigFactory.parseString("""{
+                                           |    spark.master: "local[*]"
+                                           |    spark.app.name: "spark-utils"
+                                           |    spark.yarn.submit.file.replication: "0"
+                                           |    spark.hadoop.hadoop.security.authentication: "simple"
+                                           |    spark.sql.warehouse.dir: "/tmp"
+                                           |    spark.driver.allowMultipleContexts: true
+                                           |  }"""))[Map[String, String]]
 
-  val spark = SparkSession.builder.config(new SparkConf().setAll(conf)).getOrCreate()
+  val spark = SparkSession.builder.config(new SparkConf().setAll(sparkConf)).getOrCreate()
 
   implicit val sqlContext = spark.sqlContext
   import DataFrameSupport._

@@ -3,6 +3,7 @@ package com.mazeboard.spark.utils
 import org.apache.spark.SparkConf
 import org.apache.spark.sql._
 import com.typesafe.config.ConfigFactory
+import com.mazeboard.config.reader.ConfigReader
 import org.scalatest._
 
 class MyBroadcastSpec extends FlatSpec with Matchers {
@@ -11,11 +12,16 @@ class MyBroadcastSpec extends FlatSpec with Matchers {
 
   System.setSecurityManager(null)
 
-  val conf = ConfigFactory.load().getConfig("phenix.sparkConf").entrySet().asScala
-    .map(e ⇒ (e.getKey, e.getValue.unwrapped().toString)).toMap
-  val spark = SparkSession.builder
-    .config(new SparkConf().setAll(conf))
-    .getOrCreate()
+  val sparkConf = new ConfigReader(ConfigFactory.parseString("""{
+                                                               |    spark.master: "local[*]"
+                                                               |    spark.app.name: "spark-utils"
+                                                               |    spark.yarn.submit.file.replication: "0"
+                                                               |    spark.hadoop.hadoop.security.authentication: "simple"
+                                                               |    spark.sql.warehouse.dir: "/tmp"
+                                                               |    spark.driver.allowMultipleContexts: true
+                                                               |  }"""))[Map[String, String]]
+
+  val spark = SparkSession.builder.config(new SparkConf().setAll(sparkConf)).getOrCreate()
 
   val sparkContext = spark.sparkContext
 
