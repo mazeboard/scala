@@ -55,7 +55,7 @@ To create a SparkConf there is two alternatives:
   }
 ```
 
-Or by extending ConfigReader and adding a new SprkConf reader
+Or by extending ConfigReader and adding a new SparkConf reader
 
 ```
   class MyConfigReader(config: Config) extends ConfigReader(config) {
