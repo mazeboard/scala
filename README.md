@@ -22,7 +22,7 @@ Like PureConfig, config-reader loads Typesafe Config configurations.
 
 Compared to PureConfig, config-reader has less boilerplate with a simple implementation based on object-reader.
 
-##### example
+##### examples
 
 ```
 val config = new ConfigReader(ConfigFactory.parseString("{foo:{a:1}}"))
@@ -38,6 +38,39 @@ assert(myBar == Map(Bar("foo") -> MyObj(a = 1, b = 0)))
 case class MyObj(a:Int, b:Int = 0)
 case class Foo(foo:MyObj)
 case class Bar(value: String)
+```
+
+To create a SparkConf there is two alternatives:
+
+```
+  val sparkConf: MySparkConf = new ConfigReader(ConfigFactory.parseString("{spark.master: local[2], spark.app.name: test}"))[MySparkConf]
+
+  class MySparkConf(sparkConf: Map[String, String]) extends SparkConf(false) {
+    assert(sparkConf.contains("spark.app.name"))
+    this.setAll(sparkConf)
+
+    override def toString(): String = {
+      s"MySparkConf(${sparkConf})"
+    }
+  }
+```
+
+Or by extending ConfigReader and adding a new SprkConf reader
+
+```
+  class MyConfigReader(config: Config) extends ConfigReader(config) {
+    override def reader[T: TypeTag](obj: Config): T = {
+      (typeOf[T] match {
+        case t if t =:= typeOf[SparkConf] => {
+          val m = getMap[String](obj).mapValues(x => unwrap(x).toString)
+          new SparkConf().setAll(m)
+        }
+        case _ => super.reader(obj)
+      }).asInstanceOf[T]
+    }
+  }
+  
+  val sparkConf: SparkConf = new MyConfigReader(ConfigFactory.parseString("{spark.master: local[2], spark.app.name: test}"))[SparkConf]
 ```
 
 ## json-reader
