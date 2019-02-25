@@ -2,7 +2,6 @@ import scalariform.formatter.preferences._
 import Dependencies._
 import sbt.Keys.libraryDependencies
 
-
 // SEE: https://github.com/sbt/sbt/issues/3618
 val workaround = {
   sys.props += "packaging.type" -> "jar"
@@ -44,15 +43,17 @@ lazy val root = (project in file(".") withId "mazeboard")
     publish := {},
     publishLocal := {}
   )
-  .aggregate(configReader, jsonReader, objectReader, sparkUtils, examples)
+  .aggregate(configReader, jsonReader, objectReader, sparkUtils, tests)
 
-lazy val examples = (project in file("examples"))
+lazy val tests = (project in file("tests"))
   .dependsOn(configReader, sparkUtils)
   .configs(IntegrationTest)
   .settings(
-    name := "examples",
-    libraryDependencies += "org.apache.kafka" % "kafka-streams" % "2.1.1" withSources() withJavadoc(),
-    libraryDependencies += "org.apache.kafka" %% "kafka-streams-scala" % "2.1.1" withSources() withJavadoc())
+    name := "tests",
+    libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % Test
+    //libraryDependencies += "org.apache.kafka" % "kafka-streams" % "2.1.0" % Test withSources() withJavadoc(),
+    //libraryDependencies += "org.apache.kafka" %% "kafka-streams-scala" % "2.1.0" % Test withSources() withJavadoc()
+)
 
 lazy val jsonReader = (project in file("json-reader"))
   .dependsOn(objectReader)
@@ -79,9 +80,9 @@ lazy val objectReader = (project in file("object-reader"))
   )
 
 lazy val sparkUtils = (project in file("spark-utils"))
+  .dependsOn(configReader)
   .settings(
     libraryDependencies += "org.scala-lang" % "scala-reflect" % scalaVersion.value,
     libraryDependencies += "org.apache.spark" %% "spark-sql" % "2.4.0" withSources() withJavadoc(),
-    libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % Test,
-    libraryDependencies += "com.typesafe" % "config" % "1.3.3"
+    libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % Test
   )
