@@ -12,9 +12,54 @@ create class instances from a dataframe
 
 concurrent broadcast update
 
-## object-reader
+## object-reader (experimental)
 
 create class instance from object
+
+this module is used to implement config-reader and json-reader, and we are planning to
+implement other readers (ie. Kafka-reader)
+
+##### object-reader interface
+
+This work is experimental and it is work in progress.
+
+Users of object-reader must implement at least `getValue`;
+
+Currently the documentation is very poor, thus for first aid look at the examples config-reader and json-reader
+implementation.
+
+The error handling should be improved (any suggestions are welcome)
+
+In the interface there is two unfortunate functions: newInstance and getReaderTypeTag; we do
+not know how to get the type tag of the reader object and to create a new instance.
+
+```
+  class Missing(e: Throwable) extends Throwable(e)
+
+  class InvalidObject(e: Throwable) extends Throwable(e)
+
+  class ReaderNotFound extends Throwable("reader not found")
+
+  class NoMatch extends Throwable("no match")
+
+  def newInstance[T](obj: X): T with ObjectReader[X] = {
+    throw new UnsupportedOperationException("newInstance is not defined")
+  }
+
+  def getReaderTypeTag: TypeTag[_] = {
+    throw new UnsupportedOperationException("getReaderTypeTag is not defined")
+  }
+
+  def reader[T](obj: X)(implicit ttag: TypeTag[T]): T = throw new ReaderNotFound
+
+  def unwrap(obj: X): AnyRef = obj.asInstanceOf[AnyRef]
+
+  def getList(obj: X): List[X] = throw new UnsupportedOperationException("getList is not defined")
+
+  def getMap[T](obj: X)(implicit ttag: TypeTag[T]): Map[_, X] = throw new UnsupportedOperationException("getMap is not defined")
+
+  def getValue(name: String, obj: X): X
+```
 
 ## config-reader
 

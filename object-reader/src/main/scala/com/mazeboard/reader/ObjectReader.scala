@@ -23,8 +23,6 @@ abstract class ObjectReader[X](root: X) extends Dynamic {
     throw new UnsupportedOperationException("getReaderTypeTag is not defined")
   }
 
-  def getValue(name: String, obj: X): X
-
   def reader[T](obj: X)(implicit ttag: TypeTag[T]): T = throw new ReaderNotFound
 
   def unwrap(obj: X): AnyRef = obj.asInstanceOf[AnyRef]
@@ -32,6 +30,8 @@ abstract class ObjectReader[X](root: X) extends Dynamic {
   def getList(obj: X): List[X] = throw new UnsupportedOperationException("getList is not defined")
 
   def getMap[T](obj: X)(implicit ttag: TypeTag[T]): Map[_, X] = throw new UnsupportedOperationException("getMap is not defined")
+
+  def getValue(name: String, obj: X): X
 
   private def getObjectTypeTag[T: TypeTag](x: T): TypeTag[T] = typeTag[T]
 
