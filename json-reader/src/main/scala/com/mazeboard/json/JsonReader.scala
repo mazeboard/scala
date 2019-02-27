@@ -1,13 +1,18 @@
-package com.mazeboard.json.reader
+package com.mazeboard.json
+
+import com.mazeboard.reader.ObjectReader
+import org.json.{JSONArray, JSONObject, JSONTokener}
 
 import scala.collection.JavaConverters._
 import scala.reflect.runtime.universe._
-import com.mazeboard.reader.ObjectReader
-import org.json.{ JSONObject, JSONArray, JSONTokener }
 
+/**
+  *
+  * @param jsonString
+  */
 class JsonReader(jsonString: String) extends JsonObjectReader(new JSONTokener(jsonString).nextValue())
 
-class JsonObjectReader(json: AnyRef) extends ObjectReader[AnyRef](json) {
+private[json] class JsonObjectReader(json: AnyRef) extends ObjectReader[AnyRef](json) {
 
   override def newInstance[T](obj: AnyRef): T with ObjectReader[AnyRef] = {
     new JsonObjectReader(obj).asInstanceOf[T with ObjectReader[AnyRef]]

@@ -1,13 +1,18 @@
-package com.mazeboard.config.reader
+package com.mazeboard.config
 
-import com.typesafe.config._
-import com.typesafe.config.ConfigException
 import java.util.concurrent.TimeUnit._
+
+import com.mazeboard.config.ConfigReader._
+import com.mazeboard.reader.ObjectReader
+import com.typesafe.config.{ConfigException, _}
+
 import scala.collection.JavaConverters._
 import scala.reflect.runtime.universe._
-import ConfigReader._
-import com.mazeboard.reader.ObjectReader
 
+/**
+  *
+  * @param config
+  */
 class ConfigReader(config: Config) extends ObjectReader[Config](config.atKey(ID)) {
 
   override def newInstance[T](obj: Config): T with ObjectReader[Config] = {
@@ -70,6 +75,7 @@ class ConfigReader(config: Config) extends ObjectReader[Config](config.atKey(ID)
     }).asInstanceOf[T]
   }
 }
+
 
 object ConfigReader {
   val ID = "id"

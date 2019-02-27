@@ -1,4 +1,4 @@
-package com.mazeboard.json.reader
+package com.mazeboard.json
 
 import scala.collection.JavaConverters._
 import scala.reflect.runtime.universe._

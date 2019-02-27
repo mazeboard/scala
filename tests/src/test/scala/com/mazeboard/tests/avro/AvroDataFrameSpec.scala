@@ -3,7 +3,7 @@ package com.mazeboard.tests.avro
 import com.typesafe.config.ConfigFactory
 import org.apache.spark.SparkConf
 import org.apache.spark.sql._
-import com.mazeboard.config.reader.ConfigReader
+import com.mazeboard.config.ConfigReader
 import com.mazeboard.spark.utils.AvroSupport
 import org.scalatest.{ FlatSpec, Matchers }
 

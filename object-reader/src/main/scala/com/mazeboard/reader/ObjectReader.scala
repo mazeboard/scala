@@ -5,6 +5,11 @@ import scala.reflect.api
 import scala.reflect.runtime.universe._
 import scala.reflect.runtime.currentMirror
 
+/**
+  *
+  * @param root
+  * @tparam X
+  */
 abstract class ObjectReader[X](root: X) extends Dynamic {
 
   class Missing(e: Throwable) extends Throwable(e)

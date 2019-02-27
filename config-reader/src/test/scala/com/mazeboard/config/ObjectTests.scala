@@ -1,9 +1,10 @@
-package com.mazeboard.config.reader
+package com.mazeboard.config
 
-import org.apache.spark.SparkConf
+import com.mazeboard.config.ConfigReader._
 import com.typesafe.config._
+import org.apache.spark.SparkConf
+
 import scala.reflect.runtime.universe._
-import ConfigReader._
 
 object ObjectTests {
   class MyConfigReader(config: Config) extends ConfigReader(config) {

@@ -1,10 +1,10 @@
-package com.mazeboard.config.reader
+package com.mazeboard.config
 
-import com.mazeboard.config.reader.ConfigReader._
+import com.mazeboard.config.ConfigReader._
+import com.mazeboard.config.ObjectTests._
 import com.typesafe.config._
-import org.scalatest.{ FlatSpec, Matchers }
-import com.mazeboard.config.reader.ObjectTests._
 import org.apache.spark.SparkConf
+import org.scalatest.{FlatSpec, Matchers}
 
 import scala.util.Try
 
