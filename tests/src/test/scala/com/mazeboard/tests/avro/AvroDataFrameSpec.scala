@@ -23,9 +23,9 @@ class AvroDataFrameSpec extends FlatSpec with Matchers {
   import spark.sqlContext.implicits._
 
   val week = WeekPattern.newBuilder().setPatternId(1900).setBegDate("20190101").setEndDate("20190107").build()
-  val store1 = Store.newBuilder().setStoEan("1").setWeekPattern(week).build()
-  val store2 = Store.newBuilder().setStoEan("2").setWeekPattern(week).build()
-  val store3 = Store.newBuilder().setStoEan("3").setWeekPattern(week).build()
+  val store1 = Store.newBuilder().setStoEan("1").setStoAnabelKey("0").setWeekPattern(week).build()
+  val store2 = Store.newBuilder().setStoEan("2").setStoAnabelKey("0").setWeekPattern(week).build()
+  val store3 = Store.newBuilder().setStoEan("3").setStoAnabelKey("0").setWeekPattern(week).build()
 
   behavior of "AvroToDataFrameSpec"
 
@@ -36,21 +36,19 @@ class AvroDataFrameSpec extends FlatSpec with Matchers {
       .toDF()
       .as[MyStore]
 
-    println(ds.map(_.stoEan).reduce((x, y) => (x.toInt + y.toInt).toString))
+    assert(ds.map(_.stoEan).reduce((x, y) => (x.toInt + y.toInt).toString) == "6")
 
-    println(ds.alias("d1")
+    assert(ds.alias("d1")
       .joinWith(
         ds.alias("d2"),
-        $"d1.value" === $"d2.value")
-      .collect()
-      .map(d ⇒ (d._1.stoEan, d._2.stoEan))
-      .toList)
+        $"d1.stoEan" === $"d2.stoEan")
+      .collect
+      .toList ==
+      List(
+        (MyStore("1", "0"), MyStore("1", "0")),
+        (MyStore("2", "0"), MyStore("2", "0")),
+        (MyStore("3", "0"), MyStore("3", "0"))))
 
-    println(ds.crossJoin(ds).as[(MyStore, MyStore)]
-      .filter(d ⇒ d._1.stoEan == d._2.stoEan)
-      .collect()
-      .map(d ⇒ (d._1.stoEan, d._2.stoEan))
-      .toList)
   }
 
 }

@@ -152,12 +152,10 @@ object ObjectTests {
     val foo = 5L
 
     def apply(x: Double, y: Double): YClass = {
-      println("apply YClass Double Doouble $x $y")
       YClass(x.round, y.round)
     }
 
     def apply(x: String): YClass = {
-      println("apply YClass String $x")
       YClass(x.length.toLong, foo)
     }
   }
@@ -165,7 +163,6 @@ object ObjectTests {
   class XClass(val x: Long, val y: Long) {
     def this(x: Long, y: String = "foo") {
       this(x, y.length.toLong)
-      println(s"XClass Long, String $x $y")
     }
 
     override def equals(obj: Any): Boolean = {
@@ -180,17 +177,14 @@ object ObjectTests {
 
   object XClass {
     def apply(x: String): XClass = {
-      println(s"apply XClass String $x")
       new XClass(x.length.toLong + 1L, 1L)
     }
 
     def apply(x: Double, y: Int): XClass = {
-      println(s"apply XClass Double,Int $x $y")
       new XClass(x.round, y.toLong)
     }
 
     def apply(x: Double, y: Double, z: Int = 10): XClass = {
-      println(s"apply XClass Double,Double, Int $x $y $z")
       new XClass(x.round, y.round + z.toLong)
     }
 

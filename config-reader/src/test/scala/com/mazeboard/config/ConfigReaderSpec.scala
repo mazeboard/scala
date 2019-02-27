@@ -4,7 +4,7 @@ import com.mazeboard.config.ConfigReader._
 import com.mazeboard.config.ObjectTests._
 import com.typesafe.config._
 import org.apache.spark.SparkConf
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.{ FlatSpec, Matchers }
 
 import scala.util.Try
 
