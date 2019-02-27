@@ -51,8 +51,6 @@ lazy val tests = (project in file("tests"))
   .settings(
     name := "tests",
     libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % Test
-    //libraryDependencies += "org.apache.kafka" % "kafka-streams" % "2.1.0" % Test withSources() withJavadoc(),
-    //libraryDependencies += "org.apache.kafka" %% "kafka-streams-scala" % "2.1.0" % Test withSources() withJavadoc()
 )
 
 lazy val jsonReader = (project in file("json-reader"))
