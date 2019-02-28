@@ -46,11 +46,13 @@ lazy val root = (project in file(".") withId "mazeboard")
   .aggregate(configReader, jsonReader, objectReader, sparkUtils, tests)
 
 lazy val tests = (project in file("tests"))
-  .dependsOn(configReader, sparkUtils)
-  .configs(IntegrationTest)
+  .dependsOn(configReader)
   .settings(
     name := "tests",
-    libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % Test
+    libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % Test,
+    libraryDependencies += "org.apache.kafka" %% "kafka" % "2.1.1" % Test withSources()
+    //libraryDependencies += "org.apache.kafka" % "kafka-streams" % "2.1.1" % Test withSources() withJavadoc(),
+    //libraryDependencies += "org.apache.kafka" %% "kafka-streams-scala" % "2.1.1" % Test withSources() withJavadoc()
 )
 
 lazy val jsonReader = (project in file("json-reader"))
