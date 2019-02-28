@@ -7,7 +7,7 @@ import scala.reflect.runtime.currentMirror
 import org.apache.avro.specific.SpecificRecordBase
 
 /**
- * load a Seq[T], or a Map[_, T] from a Dataframe
+ * load a Seq[T], or a Map[_, T] from a Avro objects
  */
 object AvroSupport {
 
