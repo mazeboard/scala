@@ -66,10 +66,13 @@ object AvroSupport {
 
   // TODO
 
-  def declare(schema: Schema, caseClassName: String, fields: String*): Unit = macro declare_Impl
+  def declare(schema: Schema, caseClassName: String, fields: String*): Any = macro declare_Impl
 
-  def declare_Impl(c: Context)(schema: c.Expr[Schema], caseClassName: c.Expr[String], fields: c.Expr[String]*): c.universe.Tree = {
+  def declare_Impl(c: Context)(schema: c.Expr[Schema], caseClassName: c.Expr[String], fields: c.Expr[String]*) = {
     import c.universe._
+    def termName(x: c.Expr[String]) = x match { case Expr(Literal(Constant(x: String))) => TermName(x) }
+    def typeName(x: c.Expr[String]) = x match { case Expr(Literal(Constant(x: String))) => TypeName(x) }
+
     /*val name = tag match { case Expr(Literal(Constant(xval: String))) => xval }
       val sym = TypeName(c.freshName(s"_Tag_${name}_"))
       val typetag = TypeName(name)
@@ -78,18 +81,19 @@ object AvroSupport {
     // if args is empty then declare a case class with all fields in avro type
     // otherwise declare case class with fields in args (use defaults if provided)
 
-    val params = fields.fold("")((a, b) => { // TODO create a list of params (Expr)
+    /*val params = fields.fold("")((a, b) => { // TODO create a list of params (Expr)
       if (a == "") {
         s"$b: Int"
       } else {
         s"$a, $b: Int"
       }
-    })
+    })*/
 
-    val name = caseClassName match { case Expr(Literal(Constant(x: String))) => TypeName(x) }
+    val params = fields.map(x => q"${termName(x)}: ${TypeName("Int")}")
 
     //val q"..$stats" = q"""case class $caseClassName $params"""
     //q"$stats"
-    q"""case class $name ()"""
+    c.Expr[Any](q"""case class ${typeName(caseClassName)} (..$params)""")
   }
+
 }

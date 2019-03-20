@@ -92,6 +92,7 @@ lazy val objectReader = (project in file("object-reader"))
 lazy val sparkUtils = (project in file("spark-utils"))
   .dependsOn(configReader)
   .settings(
+    name := "spark-utils",
     libraryDependencies += "org.scala-lang" % "scala-reflect" % scalaVersion.value,
     libraryDependencies += "org.apache.spark" %% "spark-sql" % "2.4.0" withSources() withJavadoc(),
     libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % Test

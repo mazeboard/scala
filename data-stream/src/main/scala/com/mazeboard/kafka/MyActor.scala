@@ -27,6 +27,6 @@ class MyActor extends Actor {
 
   def receive = {
     case "test" ⇒ log.info("received test")
-    case _      ⇒ log.info("received unknown message")
+    case _ ⇒ log.info("received unknown message")
   }
 }

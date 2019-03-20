@@ -1,6 +1,5 @@
 package com.mazeboard.spark.utils
 
-import org.apache.avro.specific.SpecificRecordBase
 import org.scalatest.{ FlatSpec, Matchers }
 
 class AvroSupportSpec extends FlatSpec with Matchers {
@@ -31,10 +30,16 @@ class AvroSupportSpec extends FlatSpec with Matchers {
   "avro macro" must "pass tests" in {
     // TODO use macro to declare case class from Schema
     // if fields is empty then the case class has all fields in the schema
-    import scala.reflect.runtime.universe._
-    declare(Store.getClassSchema, "Azerty", "stoEan", "stoAnabelKey")
+    import Foo._
     //println(Azerty())
   }
+
+}
+
+object Foo {
+  import AvroSupport._
+
+ declare(Store.getClassSchema, "Azerty", "stoEan", "stoAnabelKey")
 
 }
 

@@ -13,7 +13,8 @@ class KafkaClientSpec extends FlatSpec with Matchers {
 
   "producers && consumers" must "pass tests" in {
     val futures = Range(0, 3).map(i => {
-      (Future(startProducer(count = 20, s"${name}_$i"))(ExecutionContext.global),
+      (
+        Future(startProducer(count = 20, s"${name}_$i"))(ExecutionContext.global),
         Future(startConsumer(id = i, groupid = name, List(s"${name}_0", s"${name}_1", s"${name}_2"), minBatchSize = 20))(ExecutionContext.global))
     })
     futures.foreach {

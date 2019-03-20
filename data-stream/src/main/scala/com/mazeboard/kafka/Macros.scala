@@ -1,6 +1,6 @@
 package com.mazeboard.macros
 
-import com.mazeboard.kafka.{DataStreamVariable, Window}
+import com.mazeboard.kafka.{ DataStreamVariable, Window }
 
 import scala.reflect.macros.blackbox.Context
 import scala.language.experimental.macros
@@ -16,7 +16,7 @@ object Macros {
     val sym = TypeName(c.freshName(s"_Tag_${name}_"))
     val typetag = TypeName(name)
     val termtag = TermName(name)
-    val q"..$stats" =  q"""
+    val q"..$stats" = q"""
     """
     println(q"$stats")
     println(q"..$stats")

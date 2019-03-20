@@ -3,8 +3,8 @@ package com.mazeboard.kafka
 import java.time.Duration
 import java.util
 
-import org.apache.kafka.clients.consumer.{ConsumerRecord, KafkaConsumer, OffsetAndMetadata}
-import org.apache.kafka.clients.producer.{KafkaProducer, ProducerRecord}
+import org.apache.kafka.clients.consumer.{ ConsumerRecord, KafkaConsumer, OffsetAndMetadata }
+import org.apache.kafka.clients.producer.{ KafkaProducer, ProducerRecord }
 import org.apache.kafka.common.TopicPartition
 import org.apache.kafka.common.header.Header
 
