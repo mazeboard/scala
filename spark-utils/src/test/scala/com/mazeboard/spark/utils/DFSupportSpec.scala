@@ -5,7 +5,9 @@ import org.apache.spark.sql._
 import org.apache.spark.sql.types._
 import com.typesafe.config.ConfigFactory
 import com.mazeboard.config.ConfigReader
+import org.apache.spark.rdd.RDD
 import org.scalatest._
+import com.databricks.spark.avro.SchemaConverters
 
 class DFSupportSpec extends FlatSpec with Matchers {
 
@@ -50,6 +52,20 @@ class DFSupportSpec extends FlatSpec with Matchers {
 
   import spark.sqlContext.implicits._
 
+  val sqlSchema: StructType = SchemaConverters
+    .toSqlType(Store.getClassSchema)
+    .dataType
+    .asInstanceOf[StructType]
+
+  val week = WeekPattern.newBuilder().setPatternId(1900).setBegDate("20190101").setEndDate("20190107").build()
+  val store1 = Store.newBuilder().setStoEan("abc").setStoAnabelKey("foo").setWeekPattern(week).build()
+  val store2 = Store.newBuilder().setStoEan("xyz").setStoAnabelKey("bar").setWeekPattern(week).build()
+  val myStore1 = MyStore(stoEan = "abc", stoAnabelKey = "foo", weekPattern = MyWeekPattern(patternId = 1900, begDate = "20190101"))
+  val myStore2 = MyStore(stoEan = "xyz", stoAnabelKey = "bar", weekPattern = MyWeekPattern(patternId = 1900, begDate = "20190101"))
+
+  val rdd: RDD[Store] = spark.sparkContext.parallelize(List(store1, store2))
+  rdd.toDF()
+
   "dfsupport" must "convert dataframe to a Map[String, MyDar]" in {
     df.loadMap[String, MyDar]((x: MyDar) ⇒ x.dar) shouldBe Map(
       "a" -> MyDar("a", MyFoo(1, 2, 3), List(MyZoo(7, 9), MyZoo(4, 8))),
@@ -63,11 +79,17 @@ class DFSupportSpec extends FlatSpec with Matchers {
   }
 
   "dfsupport" must "convert dataframe to Seq[MyDar]" in {
-    df.load[MyDar] shouldBe List(
+    df.load[MyDar].collect.toList shouldBe List(
       MyDar("a", MyFoo(1, 2, 3), List(MyZoo(7, 9), MyZoo(4, 8))),
       MyDar("b", MyFoo(4, 5, 7), List(MyZoo(8, 11))))
   }
 
+  "dfsupport" must "convert dataframe using as" in {
+    val x: Dataset[MyDar] = df.as[MyDar]
+    x.collect.toList shouldBe List(
+      MyDar("a", MyFoo(1, 2, 3), List(MyZoo(7, 9), MyZoo(4, 8))),
+      MyDar("b", MyFoo(4, 5, 7), List(MyZoo(8, 11))))
+  }
 }
 
 case class MyDar(
@@ -78,3 +100,6 @@ case class MyDar(
 case class MyFoo(zoo: Int, noo: Int, hoo: Int)
 
 case class MyZoo(boo: Int, joo: Int)
+
+case class MyStore(stoEan: String, stoAnabelKey: String, weekPattern: MyWeekPattern)
+case class MyWeekPattern(patternId: Int, begDate: String)

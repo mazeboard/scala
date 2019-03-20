@@ -51,7 +51,11 @@ abstract class ObjectReader[X](root: X) extends Dynamic {
       dispatch[T](default)
     } catch {
       case e: Missing => {
-        if (default == null) throw e else default
+        if (default == null) {
+          if (typeOf[T].typeSymbol == typeOf[Option[_]].typeSymbol)
+            None.asInstanceOf[T]
+          else throw e
+        } else default
       }
     }
   }
@@ -101,6 +105,8 @@ abstract class ObjectReader[X](root: X) extends Dynamic {
           case t if t =:= typeOf[String] => unwrap(obj).toString
           case _ => load[T]
         }
+      case e: Throwable =>
+        throw e
     })
       .asInstanceOf[T]
   }

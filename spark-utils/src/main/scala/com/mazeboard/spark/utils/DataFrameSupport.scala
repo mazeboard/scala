@@ -4,7 +4,6 @@ import org.apache.spark.sql._
 import scala.reflect.api
 import scala.reflect.runtime.universe._
 import scala.reflect.runtime.currentMirror
-import org.apache.avro.specific.SpecificRecordBase
 
 /**
  * load a Seq[T], or a Map[_, T] from a Dataframe
@@ -60,9 +59,7 @@ object DataFrameSupport {
   }
 
   implicit class DataFrameSupportRich(df: DataFrame) {
-    def load[T: Encoder: TypeTag]: Seq[T] = {
-      convert(df.map(_load[T]).collect(): _*)
-    }
+    def load[T: Encoder: TypeTag]: Dataset[T] = df.map(_load[T])
 
     def loadMap[S: Encoder: TypeTag, T: Encoder: TypeTag](getKey: T ⇒ S)(implicit sqlContext: SQLContext): Map[S, T] = {
       import sqlContext.implicits._

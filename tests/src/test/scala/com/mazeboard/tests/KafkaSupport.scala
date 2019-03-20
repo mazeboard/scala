@@ -13,7 +13,7 @@ object KafkaSupport {
     println(s"startProducer count:$count topic:$topic")
     val props = new util.Properties
     props.put("bootstrap.servers", "localhost:9092")
-    props.put("acks", "all")
+    props.put("acks", "all") //The "all" setting we have specified will result in blocking on the full commit of the record, the slowest but most durable setting
     props.put("delivery.timeout.ms", "30000")
     props.put("batch.size", "16384")
     props.put("linger.ms", "1")

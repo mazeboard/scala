@@ -43,17 +43,27 @@ lazy val root = (project in file(".") withId "mazeboard")
     publish := {},
     publishLocal := {}
   )
-  .aggregate(configReader, jsonReader, objectReader, sparkUtils, tests)
+  .aggregate(configReader, jsonReader, objectReader, sparkUtils, dataStream, tests)
 
 lazy val tests = (project in file("tests"))
-  .dependsOn(configReader)
+  .dependsOn(configReader, dataStream)
   .settings(
     name := "tests",
-    libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % Test,
-    libraryDependencies += "org.apache.kafka" %% "kafka" % "2.1.1" % Test withSources()
+    libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % Test
     //libraryDependencies += "org.apache.kafka" % "kafka-streams" % "2.1.1" % Test withSources() withJavadoc(),
     //libraryDependencies += "org.apache.kafka" %% "kafka-streams-scala" % "2.1.1" % Test withSources() withJavadoc()
 )
+
+lazy val dataStream = (project in file("data-stream"))
+  .dependsOn(configReader)
+  .settings(
+    name := "data-stream",
+    libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % Test,
+    libraryDependencies += "org.scala-lang" % "scala-reflect" % scalaVersion.value,
+    libraryDependencies += "org.apache.kafka" %% "kafka" % "2.1.1",
+    libraryDependencies += "com.typesafe.akka" %% "akka-actor" % "2.5.21"
+    //, libraryDependencies += "com.typesafe.akka" %% "akka-stream" % "2.5.21"
+  )
 
 lazy val jsonReader = (project in file("json-reader"))
   .dependsOn(objectReader)

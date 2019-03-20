@@ -5,6 +5,9 @@ import scala.reflect.api
 import scala.reflect.runtime.universe._
 import scala.reflect.runtime.currentMirror
 import org.apache.avro.specific.SpecificRecordBase
+import scala.reflect.macros.blackbox.Context
+import scala.language.experimental.macros
+import org.apache.avro.Schema
 
 /**
  * load a Seq[T], or a Map[_, T] from a Avro objects
@@ -50,10 +53,8 @@ object AvroSupport {
     createInstance[T](elems: _*)
   }
 
-  def load[T: TypeTag](objs: Seq[SpecificRecordBase]): Seq[T] = convert(objs.map(_load[T]): _*)
-
   implicit class SpecificRecordBaseSupportSeqRich(objs: Seq[SpecificRecordBase]) {
-    def load[T: TypeTag]: Seq[T] = convert(objs.map(_load[T]): _*)
+    def load[T: TypeTag]: Seq[T] = objs.map(_load[T])
 
     def loadMap[S, T: TypeTag](getKey: T ⇒ S): Map[S, T] =
       objs.map(_load[T]).map(x ⇒ (getKey(x), x)).toMap
@@ -61,5 +62,34 @@ object AvroSupport {
 
   implicit class SpecificRecordBaseSupportRich(obj: SpecificRecordBase) {
     def load[T: TypeTag]: T = _load[T](obj)
+  }
+
+  // TODO
+
+  def declare(schema: Schema, caseClassName: String, fields: String*): Unit = macro declare_Impl
+
+  def declare_Impl(c: Context)(schema: c.Expr[Schema], caseClassName: c.Expr[String], fields: c.Expr[String]*): c.universe.Tree = {
+    import c.universe._
+    /*val name = tag match { case Expr(Literal(Constant(xval: String))) => xval }
+      val sym = TypeName(c.freshName(s"_Tag_${name}_"))
+      val typetag = TypeName(name)
+      val termtag = TermName(name)*/
+
+    // if args is empty then declare a case class with all fields in avro type
+    // otherwise declare case class with fields in args (use defaults if provided)
+
+    val params = fields.fold("")((a, b) => { // TODO create a list of params (Expr)
+      if (a == "") {
+        s"$b: Int"
+      } else {
+        s"$a, $b: Int"
+      }
+    })
+
+    val name = caseClassName match { case Expr(Literal(Constant(x: String))) => TypeName(x) }
+
+    //val q"..$stats" = q"""case class $caseClassName $params"""
+    //q"$stats"
+    q"""case class $name ()"""
   }
 }

@@ -1,5 +1,6 @@
 package com.mazeboard.spark.utils
 
+import org.apache.avro.specific.SpecificRecordBase
 import org.scalatest.{ FlatSpec, Matchers }
 
 class AvroSupportSpec extends FlatSpec with Matchers {
@@ -17,8 +18,6 @@ class AvroSupportSpec extends FlatSpec with Matchers {
   "avrosupport" must "pass tests" in {
     store2.load[MyStoreW] shouldBe myStore3
 
-    load[MyStore](Seq(store1, store2)) shouldBe List(myStore1, myStore2)
-
     List(store1, store2)
       .loadMap[String, MyStore]((x: MyStore) ⇒ x.stoEan) shouldBe
       Map("abc" -> myStore1, "xyz" -> myStore2)
@@ -29,8 +28,16 @@ class AvroSupportSpec extends FlatSpec with Matchers {
     store2.load[MyStore] shouldBe myStore2
   }
 
+  "avro macro" must "pass tests" in {
+    // TODO use macro to declare case class from Schema
+    // if fields is empty then the case class has all fields in the schema
+    import scala.reflect.runtime.universe._
+    declare(Store.getClassSchema, "Azerty", "stoEan", "stoAnabelKey")
+    //println(Azerty())
+  }
+
 }
 
-case class MyStore(stoEan: String, stoAnabelKey: String, weekPattern: MyWeekPattern)
+//case class MyStore(stoEan: String, stoAnabelKey: String, weekPattern: MyWeekPattern)
 case class MyStoreW(stoEan: String, stoAnabelKey: String, weekPattern: WeekPattern)
-case class MyWeekPattern(patternId: Int, begDate: String)
+//case class MyWeekPattern(patternId: Int, begDate: String)
