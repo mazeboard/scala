@@ -95,5 +95,6 @@ lazy val sparkUtils = (project in file("spark-utils"))
     name := "spark-utils",
     libraryDependencies += "org.scala-lang" % "scala-reflect" % scalaVersion.value,
     libraryDependencies += "org.apache.spark" %% "spark-sql" % "2.4.0" withSources() withJavadoc(),
+    libraryDependencies += "com.databricks" %% "spark-avro" % "4.0.0",
     libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % Test
   )

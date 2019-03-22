@@ -66,9 +66,13 @@ object AvroSupport {
 
   // TODO
 
-  def declare(schema: Schema, caseClassName: String, fields: String*): Any = macro declare_Impl
+  abstract class MyProduct[T <: SpecificRecordBase] extends Product {
+    def load(obj: T): _ <: MyProduct[T]
+  }
 
-  def declare_Impl(c: Context)(schema: c.Expr[Schema], caseClassName: c.Expr[String], fields: c.Expr[String]*) = {
+  def declare[T <: SpecificRecordBase](caseClassName: String, fields: String*): MyProduct[T] = macro declare_Impl[T]
+
+  def declare_Impl[T: c.WeakTypeTag](c: Context)(caseClassName: c.Expr[String], fields: c.Expr[String]*) = {
     import c.universe._
     def termName(x: c.Expr[String]) = x match { case Expr(Literal(Constant(x: String))) => TermName(x) }
     def typeName(x: c.Expr[String]) = x match { case Expr(Literal(Constant(x: String))) => TypeName(x) }
@@ -93,7 +97,37 @@ object AvroSupport {
 
     //val q"..$stats" = q"""case class $caseClassName $params"""
     //q"$stats"
-    c.Expr[Any](q"""case class ${typeName(caseClassName)} (..$params)""")
+    //q"""case class ${typeName(caseClassName)} (..$params)"""
+    c.Expr[MyProduct[T]](q"""
+              class Foo extends MyProduct {
+                        var stoEan: String = _
+                        var stoAnabelKey: String = _
+                        def productArity = 2
+                   
+       @throws(classOf[IndexOutOfBoundsException])
+                         def productElement(n: Int) = n match {
+                           case 0 => stoEan
+                           case 1 => stoAnabelKey
+                           case _ => throw new IndexOutOfBoundsException(n.toString())
+                         }
+                   
+       def canEqual(that: Any): Boolean = {
+                           that match {
+                             case x:Foo => x.stoEan == this.stoEan && x.stoAnabelKey == this.stoAnabelKey
+                             case _ => false
+                           }
+                         }
+                   
+     }
+     object Foo {
+                                                def load(obj:SpecificRecordBase): Foo  {
+                                                     val o = new Foo
+                                                     o.stoEan = obj.stoEan
+                                                     o.stoAnabelKey = obj.stoAnabelKey
+                                                     o
+                                                 }
+                             }
+     Foo""")
   }
 
 }
