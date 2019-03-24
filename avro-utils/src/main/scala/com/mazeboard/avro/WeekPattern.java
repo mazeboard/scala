@@ -1,25 +1,24 @@
-package com.mazeboard.spark.utils;
+package com.mazeboard.avro;
+import org.apache.spark.sql.catalyst.DefinedByConstructorParams;
 
-public class WeekPattern extends org.apache.avro.specific.SpecificRecordBase implements org.apache.avro.specific.SpecificRecord {
+import java.io.Serializable;
+
+public class WeekPattern extends org.apache.avro.specific.SpecificRecordBase implements org.apache.avro.specific.SpecificRecord, DefinedByConstructorParams, Serializable {
     public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse(
-            "{\"type\":\"record\",\"name\":\"WeekPattern\",\"namespace\":\"com.mazeboard.spark.utils\",\"doc\":\"Pattern for the week\",\"fields\":[" +
+            "{\"type\":\"record\",\"name\":\"WeekPattern\",\"namespace\":\"com.mazeboard.avro\",\"doc\":\"Pattern for the week\",\"fields\":[" +
                     "{\"name\":\"patternId\",\"type\":[\"null\",\"int\"],\"doc\":\"Identifier of the pattern\",\"default\":null}," +
                     "{\"name\":\"begDate\",\"type\":[\"null\",{\"type\":\"string\",\"avro.java.string\":\"String\"}],\"doc\":\"Start date\",\"default\":null}," +
                     "{\"name\":\"endDate\",\"type\":[\"null\",{\"type\":\"string\",\"avro.java.string\":\"String\"}],\"doc\":\"End Date\",\"default\":null}]}");
     public static org.apache.avro.Schema getClassSchema() { return SCHEMA$; }
-    /** Identifier of the pattern */
-    @Deprecated public java.lang.Integer patternId;
-    /** Start date */
-    @Deprecated public java.lang.String begDate;
-    /** End Date */
-    @Deprecated public java.lang.String endDate;
+     public java.lang.Integer patternId;
+     public java.lang.String begDate;
+     public java.lang.String endDate;
 
     /**
      * Default constructor.  Note that this does not initialize fields
      * to their default values from the schema.  If that is desired then
      * one should use <code>newBuilder()</code>.
      */
-    public WeekPattern() {}
 
     /**
      * All-args constructor.
@@ -29,6 +28,12 @@ public class WeekPattern extends org.apache.avro.specific.SpecificRecordBase imp
         this.begDate = begDate;
         this.endDate = endDate;
     }
+
+    //public WeekPattern() {}
+
+    public java.lang.Integer patternId() { return this.patternId; }
+    public java.lang.String begDate() { return this.begDate; }
+    public java.lang.String endDate() { return this.endDate; }
 
     public org.apache.avro.Schema getSchema() { return SCHEMA$; }
     // Used by DatumWriter.  Applications should not call.
@@ -97,18 +102,18 @@ public class WeekPattern extends org.apache.avro.specific.SpecificRecordBase imp
     }
 
     /** Creates a new WeekPattern RecordBuilder */
-    public static com.mazeboard.spark.utils.WeekPattern.Builder newBuilder() {
-        return new com.mazeboard.spark.utils.WeekPattern.Builder();
+    public static com.mazeboard.avro.WeekPattern.Builder newBuilder() {
+        return new com.mazeboard.avro.WeekPattern.Builder();
     }
 
     /** Creates a new WeekPattern RecordBuilder by copying an existing Builder */
-    public static com.mazeboard.spark.utils.WeekPattern.Builder newBuilder(com.mazeboard.spark.utils.WeekPattern.Builder other) {
-        return new com.mazeboard.spark.utils.WeekPattern.Builder(other);
+    public static com.mazeboard.avro.WeekPattern.Builder newBuilder(com.mazeboard.avro.WeekPattern.Builder other) {
+        return new com.mazeboard.avro.WeekPattern.Builder(other);
     }
 
     /** Creates a new WeekPattern RecordBuilder by copying an existing WeekPattern instance */
-    public static com.mazeboard.spark.utils.WeekPattern.Builder newBuilder(com.mazeboard.spark.utils.WeekPattern other) {
-        return new com.mazeboard.spark.utils.WeekPattern.Builder(other);
+    public static com.mazeboard.avro.WeekPattern.Builder newBuilder(com.mazeboard.avro.WeekPattern other) {
+        return new com.mazeboard.avro.WeekPattern.Builder(other);
     }
 
     /**
@@ -123,11 +128,11 @@ public class WeekPattern extends org.apache.avro.specific.SpecificRecordBase imp
 
         /** Creates a new Builder */
         private Builder() {
-            super(com.mazeboard.spark.utils.WeekPattern.SCHEMA$);
+            super(com.mazeboard.avro.WeekPattern.SCHEMA$);
         }
 
         /** Creates a Builder by copying an existing Builder */
-        private Builder(com.mazeboard.spark.utils.WeekPattern.Builder other) {
+        private Builder(com.mazeboard.avro.WeekPattern.Builder other) {
             super(other);
             if (isValidValue(fields()[0], other.patternId)) {
                 this.patternId = data().deepCopy(fields()[0].schema(), other.patternId);
@@ -144,8 +149,8 @@ public class WeekPattern extends org.apache.avro.specific.SpecificRecordBase imp
         }
 
         /** Creates a Builder by copying an existing WeekPattern instance */
-        private Builder(com.mazeboard.spark.utils.WeekPattern other) {
-            super(com.mazeboard.spark.utils.WeekPattern.SCHEMA$);
+        private Builder(com.mazeboard.avro.WeekPattern other) {
+            super(com.mazeboard.avro.WeekPattern.SCHEMA$);
             if (isValidValue(fields()[0], other.patternId)) {
                 this.patternId = data().deepCopy(fields()[0].schema(), other.patternId);
                 fieldSetFlags()[0] = true;
@@ -166,7 +171,7 @@ public class WeekPattern extends org.apache.avro.specific.SpecificRecordBase imp
         }
 
         /** Sets the value of the 'patternId' field */
-        public com.mazeboard.spark.utils.WeekPattern.Builder setPatternId(java.lang.Integer value) {
+        public com.mazeboard.avro.WeekPattern.Builder setPatternId(java.lang.Integer value) {
             validate(fields()[0], value);
             this.patternId = value;
             fieldSetFlags()[0] = true;
@@ -179,7 +184,7 @@ public class WeekPattern extends org.apache.avro.specific.SpecificRecordBase imp
         }
 
         /** Clears the value of the 'patternId' field */
-        public com.mazeboard.spark.utils.WeekPattern.Builder clearPatternId() {
+        public com.mazeboard.avro.WeekPattern.Builder clearPatternId() {
             patternId = null;
             fieldSetFlags()[0] = false;
             return this;
@@ -191,7 +196,7 @@ public class WeekPattern extends org.apache.avro.specific.SpecificRecordBase imp
         }
 
         /** Sets the value of the 'begDate' field */
-        public com.mazeboard.spark.utils.WeekPattern.Builder setBegDate(java.lang.String value) {
+        public com.mazeboard.avro.WeekPattern.Builder setBegDate(java.lang.String value) {
             validate(fields()[1], value);
             this.begDate = value;
             fieldSetFlags()[1] = true;
@@ -204,7 +209,7 @@ public class WeekPattern extends org.apache.avro.specific.SpecificRecordBase imp
         }
 
         /** Clears the value of the 'begDate' field */
-        public com.mazeboard.spark.utils.WeekPattern.Builder clearBegDate() {
+        public com.mazeboard.avro.WeekPattern.Builder clearBegDate() {
             begDate = null;
             fieldSetFlags()[1] = false;
             return this;
@@ -216,7 +221,7 @@ public class WeekPattern extends org.apache.avro.specific.SpecificRecordBase imp
         }
 
         /** Sets the value of the 'endDate' field */
-        public com.mazeboard.spark.utils.WeekPattern.Builder setEndDate(java.lang.String value) {
+        public com.mazeboard.avro.WeekPattern.Builder setEndDate(java.lang.String value) {
             validate(fields()[2], value);
             this.endDate = value;
             fieldSetFlags()[2] = true;
@@ -229,13 +234,23 @@ public class WeekPattern extends org.apache.avro.specific.SpecificRecordBase imp
         }
 
         /** Clears the value of the 'endDate' field */
-        public com.mazeboard.spark.utils.WeekPattern.Builder clearEndDate() {
+        public com.mazeboard.avro.WeekPattern.Builder clearEndDate() {
             endDate = null;
             fieldSetFlags()[2] = false;
             return this;
         }
 
         @Override
+        public WeekPattern build() {
+            try {
+                return new WeekPattern(fieldSetFlags()[0] ? this.patternId : (java.lang.Integer) defaultValue(fields()[0]),
+                        fieldSetFlags()[1] ? this.begDate : (java.lang.String) defaultValue(fields()[1]),
+                        fieldSetFlags()[2] ? this.endDate : (java.lang.String) defaultValue(fields()[2]));
+            } catch (Exception e) {
+                throw new org.apache.avro.AvroRuntimeException(e);
+            }
+        }
+        /*@Override
         public WeekPattern build() {
             try {
                 WeekPattern record = new WeekPattern();
@@ -246,6 +261,6 @@ public class WeekPattern extends org.apache.avro.specific.SpecificRecordBase imp
             } catch (Exception e) {
                 throw new org.apache.avro.AvroRuntimeException(e);
             }
-        }
+        }*/
     }
 }

@@ -8,6 +8,8 @@ import com.mazeboard.config.ConfigReader
 import org.apache.spark.rdd.RDD
 import org.scalatest._
 import com.databricks.spark.avro.SchemaConverters
+import com.mazeboard.avro.Store
+import com.mazeboard.avro.WeekPattern
 
 class DFSupportSpec extends FlatSpec with Matchers {
 
@@ -63,8 +65,8 @@ class DFSupportSpec extends FlatSpec with Matchers {
   val myStore1 = MyStore(stoEan = "abc", stoAnabelKey = "foo", weekPattern = MyWeekPattern(patternId = 1900, begDate = "20190101"))
   val myStore2 = MyStore(stoEan = "xyz", stoAnabelKey = "bar", weekPattern = MyWeekPattern(patternId = 1900, begDate = "20190101"))
 
-  val rdd: RDD[Store] = spark.sparkContext.parallelize(List(store1, store2))
-  rdd.toDF()
+  //val rdd: RDD[Store] = spark.sparkContext.parallelize(List(store1, store2))
+  //rdd.toDF()
 
   "dfsupport" must "convert dataframe to a Map[String, MyDar]" in {
     df.loadMap[String, MyDar]((x: MyDar) ⇒ x.dar) shouldBe Map(

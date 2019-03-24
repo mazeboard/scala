@@ -8,6 +8,8 @@ val workaround = {
   ()
 }
 
+javacOptions in avroUtils ++= Seq("-parameters")
+
 val resolutionRepos = Seq(
   "confluent" at "https://packages.confluent.io/maven/",
   Resolver.bintrayRepo("ovotech", "maven")
@@ -43,18 +45,18 @@ lazy val root = (project in file(".") withId "mazeboard")
     publish := {},
     publishLocal := {}
   )
-  .aggregate(configReader, jsonReader, objectReader, sparkUtils, dataStream, tests)
+  .aggregate(configReader, jsonReader, objectReader, avroUtils, sparkUtils/*, dataStream, tests*/)
 
-lazy val tests = (project in file("tests"))
-  .dependsOn(configReader, dataStream)
+/*lazy val tests = (project in file("tests"))
+  .dependsOn(configReader/*, dataStream*/)
   .settings(
     name := "tests",
     libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % Test
     //libraryDependencies += "org.apache.kafka" % "kafka-streams" % "2.1.1" % Test withSources() withJavadoc(),
     //libraryDependencies += "org.apache.kafka" %% "kafka-streams-scala" % "2.1.1" % Test withSources() withJavadoc()
-)
+)*/
 
-lazy val dataStream = (project in file("data-stream"))
+/*lazy val dataStream = (project in file("data-stream"))
   .dependsOn(configReader)
   .settings(
     name := "data-stream",
@@ -64,7 +66,7 @@ lazy val dataStream = (project in file("data-stream"))
     libraryDependencies += "com.typesafe.akka" %% "akka-actor" % "2.5.21"
     //, libraryDependencies += "com.typesafe.akka" %% "akka-stream" % "2.5.21"
   )
-
+*/
 lazy val jsonReader = (project in file("json-reader"))
   .dependsOn(objectReader)
   .settings(
@@ -90,11 +92,22 @@ lazy val objectReader = (project in file("object-reader"))
   )
 
 lazy val sparkUtils = (project in file("spark-utils"))
-  .dependsOn(configReader)
+  .dependsOn(configReader, avroUtils)
   .settings(
     name := "spark-utils",
     libraryDependencies += "org.scala-lang" % "scala-reflect" % scalaVersion.value,
     libraryDependencies += "org.apache.spark" %% "spark-sql" % "2.4.0" withSources() withJavadoc(),
-    libraryDependencies += "com.databricks" %% "spark-avro" % "4.0.0",
+    libraryDependencies += "com.databricks" % "spark-avro_2.11" % "4.0.0",
+    libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % Test
+  )
+
+lazy val avroUtils = (project in file("avro-utils"))
+  .dependsOn(configReader)
+  .settings(
+    name := "avro-utils",
+    libraryDependencies += "org.scala-lang" % "scala-reflect" % scalaVersion.value,
+    libraryDependencies += "org.apache.avro" % "avro-tools" % "1.8.2",
+    libraryDependencies += "org.apache.spark" %% "spark-sql" % "2.4.0" withSources() withJavadoc(),
+    libraryDependencies += "com.databricks" % "spark-avro_2.11" % "4.0.0",
     libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % Test
   )

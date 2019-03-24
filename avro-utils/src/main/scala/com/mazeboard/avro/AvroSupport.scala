@@ -1,20 +1,17 @@
-package com.mazeboard.spark.utils
+package com.mazeboard.avro
 
-import org.apache.spark.sql._
-import scala.reflect.api
-import scala.reflect.runtime.universe._
-import scala.reflect.runtime.currentMirror
 import org.apache.avro.specific.SpecificRecordBase
-import scala.reflect.macros.blackbox.Context
+
 import scala.language.experimental.macros
-import org.apache.avro.Schema
+import scala.reflect.api
+import scala.reflect.macros.blackbox.Context
+import scala.reflect.runtime.currentMirror
+import scala.reflect.runtime.universe._
 
 /**
  * load a Seq[T], or a Map[_, T] from a Avro objects
  */
 object AvroSupport {
-
-  import scala.collection.JavaConverters._
 
   private def getTypeTag(tpe: Type): TypeTag[_] = {
     val mirror = runtimeMirror(tpe.getClass.getClassLoader)
@@ -66,13 +63,9 @@ object AvroSupport {
 
   // TODO
 
-  abstract class MyProduct[T <: SpecificRecordBase] extends Product {
-    def load(obj: T): _ <: MyProduct[T]
-  }
+  def declare[T <: SpecificRecordBase]: Int = macro declare_Impl[T]
 
-  def declare[T <: SpecificRecordBase](caseClassName: String, fields: String*): MyProduct[T] = macro declare_Impl[T]
-
-  def declare_Impl[T: c.WeakTypeTag](c: Context)(caseClassName: c.Expr[String], fields: c.Expr[String]*) = {
+  def declare_Impl[T: c.WeakTypeTag](c: Context) = {
     import c.universe._
     def termName(x: c.Expr[String]) = x match { case Expr(Literal(Constant(x: String))) => TermName(x) }
     def typeName(x: c.Expr[String]) = x match { case Expr(Literal(Constant(x: String))) => TypeName(x) }
@@ -93,41 +86,45 @@ object AvroSupport {
       }
     })*/
 
-    val params = fields.map(x => q"${termName(x)}: ${TypeName("Int")}")
-
     //val q"..$stats" = q"""case class $caseClassName $params"""
     //q"$stats"
     //q"""case class ${typeName(caseClassName)} (..$params)"""
-    c.Expr[MyProduct[T]](q"""
-              class Foo extends MyProduct {
-                        var stoEan: String = _
-                        var stoAnabelKey: String = _
-                        def productArity = 2
-                   
-       @throws(classOf[IndexOutOfBoundsException])
-                         def productElement(n: Int) = n match {
-                           case 0 => stoEan
-                           case 1 => stoAnabelKey
-                           case _ => throw new IndexOutOfBoundsException(n.toString())
-                         }
-                   
-       def canEqual(that: Any): Boolean = {
-                           that match {
-                             case x:Foo => x.stoEan == this.stoEan && x.stoAnabelKey == this.stoAnabelKey
-                             case _ => false
-                           }
-                         }
-                   
-     }
-     object Foo {
-                                                def load(obj:SpecificRecordBase): Foo  {
-                                                     val o = new Foo
-                                                     o.stoEan = obj.stoEan
-                                                     o.stoAnabelKey = obj.stoAnabelKey
-                                                     o
-                                                 }
-                             }
-     Foo""")
+
+    val x = q"""{
+      import org.apache.avro.specific.SpecificRecordBase
+      case class Foo() extends Product {
+        var stoEan: String = _
+        var stoAnabelKey: String = _
+
+        def productArity = 2
+
+        @throws(classOf[IndexOutOfBoundsException])
+        def productElement(n: Int) = n match {
+          case 0 => stoEan
+          case 1 => stoAnabelKey
+          case _ => throw new IndexOutOfBoundsException(n.toString())
+        }
+
+        def canEqual(that: Any): Boolean = {
+          that match {
+            case x: Foo => x.stoEan == this.stoEan && x.stoAnabelKey == this.stoAnabelKey
+            case _ => false
+          }
+        }
+
+
+        def load(obj: SpecificRecordBase): Foo = {
+          val o = new Foo
+          o.stoEan = obj.get("stoEan").asInstanceOf[String]
+          o.stoAnabelKey = obj.get("stoAnabelKey").asInstanceOf[String]
+          o
+        }
+      }
+      val abc:Int=123
+      abc
+    }"""
+    println(x)
+    x
   }
 
 }
