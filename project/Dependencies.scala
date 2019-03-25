@@ -2,7 +2,7 @@ import sbt._
 
 object Dependencies {
   
-  val Logging = {
+  /*val Logging = {
     val version  = "1.2.3"
     Seq(
       "ch.qos.logback" % "logback-core" % version,
@@ -22,6 +22,6 @@ object Dependencies {
   val ScalaTest = Seq(
     "org.scalatest" %% "scalatest" % "3.0.5" % "test,it",
     "org.scalamock" %% "scalamock" % "4.1.0" % "test,it"
-  )
+  )*/
 
 }

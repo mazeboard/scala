@@ -61,15 +61,16 @@ class AvroSupportSpec extends FlatSpec with Matchers {
     import java.io._
 
     val s = """{"namespace": "example.avro",
-               | "type": "record",
-               | "name": "User",
-               | "fields": [
-               |     {"name": "name", "type": "string"},
-               |     {"name": "favorite_number",  "type": ["int", "null"]},
-               |     {"name": "favorite_color", "type": ["string", "null"]}
-               | ]
-               |}"""
+                "type": "record",
+                "name": "User",
+                "fields": [
+                    {"name": "name", "type": "string"},
+                    {"name": "favorite_number",  "type": ["int", "null"]},
+                    {"name": "favorite_color", "type": ["string", "null"]}
+                ]
+               }"""
     val schema: Schema = new Schema.Parser().parse(s)
+    println("name schema", schema.getField("name").schema())
     val user1: GenericData.Record = new GenericData.Record(schema)
     user1.put("name", "Alyssa")
     user1.put("favorite_number", 256)
@@ -103,18 +104,34 @@ class AvroSupportSpec extends FlatSpec with Matchers {
   "avro compile user.avsc to scala" must "pass tests" in {
     import org.apache.avro.compiler.specific.SpecificCompiler
     import java.io.File
+    import org.apache.avro.Schema
+    import org.apache.avro.generic.GenericData.StringType
 
     val src = new File("user.avsc")
     val dest = new File("avro-utils/src/main/scala")
 
     System.setProperty(
       "org.apache.avro.specific.templates",
-      "avro-utils/src/main/scala/com/mazeboard/avro/compiler/specific/templates/scala/spark/")
+      "avro-utils/src/main/scala/com/mazeboard/avro/compiler/specific/templates/java/spark/")
 
-    SpecificCompiler.compileSchema(src, dest)
+    //SpecificCompiler.compileSchema(src, dest)
+
+    val s = """{"namespace": "example.avro",
+                "type": "record",
+                "name": "YUser",
+                "fields": [
+                    {"name": "name", "type": "string"},
+                    {"name": "favorite_number",  "type": ["int", "null"]},
+                    {"name": "favorite_color", "type": ["string", "null"]}
+                ]
+               }"""
+    val schema: Schema = new Schema.Parser().parse(s)
+    val compiler = new SpecificCompiler(schema)
+    compiler.setStringType(StringType.valueOf("String"))
+    compiler.compileToDestination(null, dest)
   }
 
-  "avro XUser reader/writer" must "pass tests" in {
+  "avro User reader/writer" must "pass tests" in {
     import org.apache.avro.generic.GenericRecord
     import org.apache.avro.generic.GenericDatumReader
     import org.apache.avro.generic.GenericDatumWriter
@@ -123,11 +140,11 @@ class AvroSupportSpec extends FlatSpec with Matchers {
     import org.apache.avro.io.DatumReader
     import org.apache.avro.io.DatumWriter
     import java.io._
-    import example.avro.XUser
+    import example.avro.User
 
-    val schema = XUser.getClassSchema
-    val user1 = new XUser("ben", 5, "red")
-    val user2 = new XUser("zen", 3, "yellow")
+    val schema = User.getClassSchema
+    val user1 = new User("ben", 5, "red")
+    val user2 = new User("zen", 3, "yellow")
 
     // Serialize user1 and user2 to disk
     val file: File = new File("users.avro")
@@ -151,43 +168,62 @@ class AvroSupportSpec extends FlatSpec with Matchers {
     }
   }
 
-  "avro XUser encoder" must "pass tests" in {
-    /*
-    {"namespace": "example.avro",
- "type": "record",
- "name": "User",
- "fields": [
-     {"name": "name", "type": "string"},
-     {"name": "favorite_number",  "type": ["int", "null"]},
-     {"name": "favorite_color", "type": ["string", "null"]}
- ]
-}
-     */
-    // java -jar ~/.ivy2/cache/org.apache.avro/avro-tools/jars/avro-tools-1.8.2.jar compile schema user.avsc .
-    import org.apache.avro.compiler.specific.SpecificCompiler.main
-
-    import example.avro.XUser
+  "avro User encoder" must "pass tests" in {
+    import example.avro.User
     import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder
     import org.apache.spark.sql.catalyst.dsl.expressions._
 
-    println("parameters", ScalaReflection.getConstructorParameters(typeOf[XUser]))
-    implicit val userEncoder = ExpressionEncoder[XUser]()
+    println("parameters", ScalaReflection.getConstructorParameters(typeOf[User]))
+    val userEncoder = ExpressionEncoder[User]()
     println(userEncoder.schema)
-    println(userEncoder.clsTag)
-    val userExprEncoder = userEncoder.asInstanceOf[ExpressionEncoder[XUser]]
-    println(userExprEncoder.flat)
+    val userExprEncoder = userEncoder.asInstanceOf[ExpressionEncoder[User]]
     println(userExprEncoder.serializer)
     println(userExprEncoder.deserializer)
-    println(userExprEncoder.namedExpressions)
-    val jacek = XUser.newBuilder()
+    val jacek = User.newBuilder()
       .setName("Ben")
       .setFavoriteNumber(7)
       .setFavoriteColor("red")
       .build()
     val row = userExprEncoder.toRow(jacek)
-    val attrs = Seq(DslSymbol('name).string, DslSymbol('favorite_number).int, DslSymbol('favorite_color).string)
-    val jacekReborn = userExprEncoder.resolveAndBind(attrs).fromRow(row)
+    val jacekReborn = userExprEncoder.resolveAndBind().fromRow(row)
+    println("jacek", jacek)
+    println("jacekReborn", jacekReborn)
     println(jacek == jacekReborn)
+
+    val attrs = Seq(DslSymbol('name).string, DslSymbol('favorite_number).int, DslSymbol('favorite_color).string)
+    println("using attrs", userExprEncoder.resolveAndBind(attrs).fromRow(row))
+  }
+
+  "avro User implicit encoder" must "pass tests" in {
+    import example.avro.User
+    import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder
+    import org.apache.spark.sql.Dataset
+
+    val spark = SparkSession.builder.master("local[2]").getOrCreate()
+    import spark.implicits._
+
+    implicit val userEncoder = ExpressionEncoder[User]()
+
+    val foo = User.newBuilder()
+      .setName("Foo")
+      .setFavoriteNumber(7)
+      .setFavoriteColor("red")
+      .build()
+    val bar = User.newBuilder()
+      .setName("Bar")
+      .setFavoriteNumber(5)
+      .setFavoriteColor("green")
+      .build()
+
+    val ds: Dataset[User] = List(foo, bar).toDS()
+
+    val x = ds.map(x => {
+      (x.getName(), x.getFavoriteColor(), x.getFavoriteNumber())
+    }).collect().toList
+
+    println(x.size)
+    println(x)
+
   }
 
   "avro Store encoder" must "pass tests" in {

@@ -10,9 +10,24 @@ val workaround = {
 
 javacOptions in avroUtils ++= Seq("-parameters")
 
+/*
+  local
+  udd-ivy-proxy-releases: https://phenix-nexus.edc.carrefour.com/content/groups/ivy-releases/, [organization]/[module]/(scala_[scalaVersion]/)(sbt_[sbtVersion]/)[revision]/[type]s/[artifact](-[classifier]).[ext]
+  udd-maven-proxy-releases: https://phenix-nexus.edc.carrefour.com/content/groups/public/
+  confluent: https://packages.confluent.io/maven/
+  jcenter: https://jcenter.bintray.com/
+  maven-central
+  mvnrepo: https://mvnrepository.com
+  typesafe-ivy-releases: https://repo.typesafe.com/typesafe/ivy-releases/, [organization]/[module]/[revision]/[type]s/[artifact](-[classifier]).[ext], bootOnly
+  sbt-ivy-snapshots: https://repo.scala-sbt.org/scalasbt/ivy-snapshots/, [organization]/[module]/[revision]/[type]s/[artifact](-[classifier]).[ext], bootOnly
+
+ */
 val resolutionRepos = Seq(
-  "confluent" at "https://packages.confluent.io/maven/",
-  Resolver.bintrayRepo("ovotech", "maven")
+  "mvnrepo" at "https://mvnrepository.com"
+  ,"confluent" at "https://packages.confluent.io/maven/"
+  ,"jcenter" at "https://jcenter.bintray.com/"
+  ,"Artima Maven Repository" at "http://repo.artima.com/releases"
+  ,Resolver.bintrayRepo("ovotech", "maven")
 )
 
 lazy val root = (project in file(".") withId "mazeboard")
@@ -22,7 +37,7 @@ lazy val root = (project in file(".") withId "mazeboard")
       organization := "com.mazeboard",
       version := "0.1.0-SNAPSHOT",
       scalaVersion := "2.12.7",
-      resolvers ++= resolutionRepos,
+      resolvers ++= resolutionRepos, 
       IntegrationTest / parallelExecution  := false,
       scalacOptions ++= Seq(
         "-deprecation",
