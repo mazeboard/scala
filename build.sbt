@@ -10,18 +10,6 @@ val workaround = {
 
 javacOptions in avroUtils ++= Seq("-parameters")
 
-/*
-  local
-  udd-ivy-proxy-releases: https://phenix-nexus.edc.carrefour.com/content/groups/ivy-releases/, [organization]/[module]/(scala_[scalaVersion]/)(sbt_[sbtVersion]/)[revision]/[type]s/[artifact](-[classifier]).[ext]
-  udd-maven-proxy-releases: https://phenix-nexus.edc.carrefour.com/content/groups/public/
-  confluent: https://packages.confluent.io/maven/
-  jcenter: https://jcenter.bintray.com/
-  maven-central
-  mvnrepo: https://mvnrepository.com
-  typesafe-ivy-releases: https://repo.typesafe.com/typesafe/ivy-releases/, [organization]/[module]/[revision]/[type]s/[artifact](-[classifier]).[ext], bootOnly
-  sbt-ivy-snapshots: https://repo.scala-sbt.org/scalasbt/ivy-snapshots/, [organization]/[module]/[revision]/[type]s/[artifact](-[classifier]).[ext], bootOnly
-
- */
 val resolutionRepos = Seq(
   "mvnrepo" at "https://mvnrepository.com"
   ,"confluent" at "https://packages.confluent.io/maven/"
@@ -121,8 +109,9 @@ lazy val avroUtils = (project in file("avro-utils"))
   .settings(
     name := "avro-utils",
     libraryDependencies += "org.scala-lang" % "scala-reflect" % scalaVersion.value,
-    libraryDependencies += "org.apache.avro" % "avro-tools" % "1.8.2",
-    libraryDependencies += "org.apache.spark" %% "spark-sql" % "2.4.0" withSources() withJavadoc(),
+    libraryDependencies += "com.thoughtworks.paranamer" % "paranamer" % "2.6",
+    libraryDependencies += "org.apache.avro" % "avro-tools" % "1.8.2" exclude ("com.thoughtworks.paranamer","paranamer"),
+    libraryDependencies += "org.apache.spark" %% "spark-sql" % "2.4.0" exclude ("com.thoughtworks.paranamer","paranamer"),
     libraryDependencies += "com.databricks" % "spark-avro_2.11" % "4.0.0",
     libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % Test
   )

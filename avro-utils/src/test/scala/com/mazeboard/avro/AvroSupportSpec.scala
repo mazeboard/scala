@@ -226,6 +226,26 @@ class AvroSupportSpec extends FlatSpec with Matchers {
 
   }
 
+  "case class XUser encoder" must "pass tests" in {
+    import org.apache.spark.sql.Dataset
+
+    val spark = SparkSession.builder.master("local[2]").getOrCreate()
+    import spark.implicits._
+
+    val foo = XUser("Foo", 7, "red")
+    val bar = XUser("Bar", 5, "green")
+
+    val ds: Dataset[XUser] = spark.sparkContext.parallelize(List(foo, bar)).toDS()
+
+    val x = ds.map(x => {
+      (x.name, x.favorite_color, x.favorite_number)
+    }).collect().toList
+
+    println(x.size)
+    println(x)
+
+  }
+
   "avro Store encoder" must "pass tests" in {
     // modify an Avro <avro> as follows:
     // 1. implement org.apache.spark.sql.catalyst.DefinedByConstructorParams
@@ -273,3 +293,4 @@ case class Person(id: Long, name: String)
 case class MyStore(stoEan: String, stoAnabelKey: String, weekPattern: MyWeekPattern)
 case class MyWeekPattern(patternId: Int, begDate: String)
 
+case class XUser(name: String, favorite_number: Int, favorite_color: String)
