@@ -10,6 +10,8 @@ import org.apache.spark.sql.catalyst.expressions.{ BoundReference, CreateNamedSt
 import org.apache.spark.sql.catalyst.expressions.objects.AssertNotNull
 import org.scalatest.{ FlatSpec, Matchers }
 import org.apache.avro.specific.SpecificRecordBase
+import org.apache.spark.network.protocol.Encoders
+
 import scala.language.dynamics
 import scala.reflect.ClassTag
 import scala.reflect.api
@@ -21,6 +23,10 @@ class AvroSupportSpec extends FlatSpec with Matchers {
 
   import scala.collection.JavaConverters._
   import AvroSupport._
+
+  ///import org.apache.spark.sql.SparkSession
+  //val spark = SparkSession.builder().master("local[2]").getOrCreate()
+  //import spark.implicits._
 
   val week = WeekPattern.newBuilder().setPatternId(1900).setBegDate("20190101").setEndDate("20190107").build()
   val store1 = Store.newBuilder().setStoEan("abc").setStoAnabelKey("foo").setWeekPattern(week).build()
@@ -94,7 +100,58 @@ class AvroSupportSpec extends FlatSpec with Matchers {
     }
   }
 
-  "avro User encoder" must "pass tests" in {
+  "avro compile user.avsc to scala" must "pass tests" in {
+    import org.apache.avro.compiler.specific.SpecificCompiler
+    import java.io.File
+
+    val src = new File("user.avsc")
+    val dest = new File("avro-utils/src/main/scala")
+
+    System.setProperty(
+      "org.apache.avro.specific.templates",
+      "avro-utils/src/main/scala/com/mazeboard/avro/compiler/specific/templates/scala/spark/")
+
+    SpecificCompiler.compileSchema(src, dest)
+  }
+
+  "avro XUser reader/writer" must "pass tests" in {
+    import org.apache.avro.generic.GenericRecord
+    import org.apache.avro.generic.GenericDatumReader
+    import org.apache.avro.generic.GenericDatumWriter
+    import org.apache.avro.file.DataFileReader
+    import org.apache.avro.file.DataFileWriter
+    import org.apache.avro.io.DatumReader
+    import org.apache.avro.io.DatumWriter
+    import java.io._
+    import example.avro.XUser
+
+    val schema = XUser.getClassSchema
+    val user1 = new XUser("ben", 5, "red")
+    val user2 = new XUser("zen", 3, "yellow")
+
+    // Serialize user1 and user2 to disk
+    val file: File = new File("users.avro")
+    val datumWriter: DatumWriter[GenericRecord] = new GenericDatumWriter[GenericRecord](schema)
+    val dataFileWriter: DataFileWriter[GenericRecord] = new DataFileWriter[GenericRecord](datumWriter)
+    dataFileWriter.create(schema, file)
+    dataFileWriter.append(user1)
+    dataFileWriter.append(user2)
+    dataFileWriter.close()
+
+    // Deserialize users from disk
+    val datumReader: DatumReader[GenericRecord] = new GenericDatumReader[GenericRecord](schema)
+    val dataFileReader: DataFileReader[GenericRecord] = new DataFileReader[GenericRecord](file, datumReader)
+    var user: GenericRecord = null
+    while (dataFileReader.hasNext()) {
+      // Reuse user object by passing it to next(). This saves us from
+      // allocating and garbage collecting many objects for files with
+      // many items.
+      user = dataFileReader.next(user)
+      System.out.println(user)
+    }
+  }
+
+  "avro XUser encoder" must "pass tests" in {
     /*
     {"namespace": "example.avro",
  "type": "record",
@@ -109,24 +166,26 @@ class AvroSupportSpec extends FlatSpec with Matchers {
     // java -jar ~/.ivy2/cache/org.apache.avro/avro-tools/jars/avro-tools-1.8.2.jar compile schema user.avsc .
     import org.apache.avro.compiler.specific.SpecificCompiler.main
 
-    import example.avro.User
+    import example.avro.XUser
     import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder
     import org.apache.spark.sql.catalyst.dsl.expressions._
 
-    val userEncoder = ExpressionEncoder[User]()
+    println("parameters", ScalaReflection.getConstructorParameters(typeOf[XUser]))
+    implicit val userEncoder = ExpressionEncoder[XUser]()
     println(userEncoder.schema)
     println(userEncoder.clsTag)
-    val userExprEncoder = userEncoder.asInstanceOf[ExpressionEncoder[User]]
+    val userExprEncoder = userEncoder.asInstanceOf[ExpressionEncoder[XUser]]
     println(userExprEncoder.flat)
     println(userExprEncoder.serializer)
     println(userExprEncoder.deserializer)
     println(userExprEncoder.namedExpressions)
-    val jacek = User.newBuilder()
+    val jacek = XUser.newBuilder()
       .setName("Ben")
+      .setFavoriteNumber(7)
       .setFavoriteColor("red")
       .build()
     val row = userExprEncoder.toRow(jacek)
-    val attrs = Seq(DslSymbol('name).string, DslSymbol('favoriteColor).string)
+    val attrs = Seq(DslSymbol('name).string, DslSymbol('favorite_number).int, DslSymbol('favorite_color).string)
     val jacekReborn = userExprEncoder.resolveAndBind(attrs).fromRow(row)
     println(jacek == jacekReborn)
   }
@@ -141,6 +200,7 @@ class AvroSupportSpec extends FlatSpec with Matchers {
 
     import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder
     import org.apache.spark.sql.catalyst.dsl.expressions._
+    import org.apache.spark.sql.Encoders
 
     val avroEncoder = ExpressionEncoder[Store]()
     println(avroEncoder.schema)

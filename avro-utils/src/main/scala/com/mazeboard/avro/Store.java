@@ -30,9 +30,7 @@ public class Store extends org.apache.avro.specific.SpecificRecordBase implement
 
     public java.lang.String stoEan() { return this.stoEan; }
     public java.lang.String stoAnabelKey() { return this.stoAnabelKey; }
-    public com.mazeboard.avro.WeekPattern weekPattern() {
-        return this.weekPattern;
-    }
+    public com.mazeboard.avro.WeekPattern weekPattern() { return this.weekPattern; }
 
     public org.apache.avro.Schema getSchema() { return SCHEMA$; }
     public java.lang.Object get(int field$) {
