@@ -221,20 +221,28 @@ class AvroSupportSpec extends FlatSpec with Matchers {
   }
 
   "avro Barcode implicit encoder" must "pass tests" in {
+
     import referential.product.v2.Barcode
     import common.lib.v1.Money
     import common.lib.v1.Currency
     import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder
+    import org.apache.spark.sql.Encoders
     import org.apache.spark.sql.Dataset
+    import scala.reflect.ClassTag
 
     val spark = SparkSession.builder.master("local[2]").getOrCreate()
     import spark.implicits._
+
+    // no implicit encoder for java.util.List[_], replace, in record.vm,  by scala.collection.Seq ?
+    // no implicit encoder for java.util.Map[_,_], replace,  in record.vm, by scala.collection.Map ?
+
+    // enum Currency, new common.lib.v1.Currency() ?
 
     implicit val barcodeEncoder = ExpressionEncoder[Barcode]()
 
     val ds: Dataset[Barcode] = 0.until(10000).map(i => Barcode.newBuilder()
       .setBarcode("Bar")
-      .setPrdTaxVal(Money.newBuilder().setUnscaledAmount(1L).build)
+      .setPrdTaxVal(Money.newBuilder().setUnscaledAmount(1L).setCurrency(Currency.EUR).build)
       .build())
       .toDS()
 

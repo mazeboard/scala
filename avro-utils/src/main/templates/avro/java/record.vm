@@ -107,12 +107,6 @@ public class ${this.mangle($schema.getName())}#if ($schema.isError()) extends or
 #else
 #if ($schema.getFields().size() > 0)
 
-  /**
-   * Default constructor.  Note that this does not initialize fields
-   * to their default values from the schema.  If that is desired then
-   * one should use <code>newBuilder()</code>.
-   */
-  public ${this.mangle($schema.getName())}() {}
 #if ($this.isCreateAllArgsConstructor())
 
   /**
@@ -422,27 +416,28 @@ public class ${this.mangle($schema.getName())}#if ($schema.isError()) extends or
     @SuppressWarnings("unchecked")
     public ${this.mangle($schema.getName())} build() {
       try {
-        ${this.mangle($schema.getName())} record = new ${this.mangle($schema.getName())}(#if ($schema.isError())getValue(), getCause()#end);
+        return new ${this.mangle($schema.getName())}(
 #foreach ($field in $schema.getFields())
 #if (${this.hasBuilder($field.schema())})
-        if (${this.mangle($field.name(), $schema.isError())}Builder != null) {
-          record.${this.mangle($field.name(), $schema.isError())} = this.${this.mangle($field.name(), $schema.isError())}Builder.build();
-        } else {
+        (${this.mangle($field.name(), $schema.isError())}Builder != null) ?
+          this.${this.mangle($field.name(), $schema.isError())}Builder.build() :
 #if ($this.hasLogicalTypeField($schema))
-          record.${this.mangle($field.name(), $schema.isError())} = fieldSetFlags()[$field.pos()] ? this.${this.mangle($field.name(), $schema.isError())} : (${this.javaType($field.schema())}) defaultValue(fields()[$field.pos()], record.getConversion($field.pos()));
+          (fieldSetFlags()[$field.pos()] ? this.${this.mangle($field.name(), $schema.isError())} : (${this.javaType($field.schema())}) defaultValue(fields()[$field.pos()], record.getConversion($field.pos())))
 #else
-          record.${this.mangle($field.name(), $schema.isError())} = fieldSetFlags()[$field.pos()] ? this.${this.mangle($field.name(), $schema.isError())} : (${this.javaType($field.schema())}) defaultValue(fields()[$field.pos()]);
+          (fieldSetFlags()[$field.pos()] ? this.${this.mangle($field.name(), $schema.isError())} : (${this.javaType($field.schema())}) defaultValue(fields()[$field.pos()]))
 #end
-        }
 #else
 #if ($this.hasLogicalTypeField($schema))
-        record.${this.mangle($field.name(), $schema.isError())} = fieldSetFlags()[$field.pos()] ? this.${this.mangle($field.name(), $schema.isError())} : (${this.javaType($field.schema())}) defaultValue(fields()[$field.pos()], record.getConversion($field.pos()));
+        fieldSetFlags()[$field.pos()] ? this.${this.mangle($field.name(), $schema.isError())} : (${this.javaType($field.schema())}) defaultValue(fields()[$field.pos()], record.getConversion($field.pos()))
 #else
-        record.${this.mangle($field.name(), $schema.isError())} = fieldSetFlags()[$field.pos()] ? this.${this.mangle($field.name(), $schema.isError())} : (${this.javaType($field.schema())}) defaultValue(fields()[$field.pos()]);
+        fieldSetFlags()[$field.pos()] ? this.${this.mangle($field.name(), $schema.isError())} : (${this.javaType($field.schema())}) defaultValue(fields()[$field.pos()])
 #end
 #end
+#if ($field.pos() < $schema.getFields().size() - 1)
+   ,
 #end
-        return record;
+#end
+    );
       } catch (java.lang.Exception e) {
         throw new org.apache.avro.AvroRuntimeException(e);
       }
