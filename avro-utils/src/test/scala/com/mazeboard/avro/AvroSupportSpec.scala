@@ -101,7 +101,7 @@ class AvroSupportSpec extends FlatSpec with Matchers {
     }
   }
 
-  "avro compile user.avsc to scala" must "pass tests" in {
+  /*"avro compile avro schema" must "pass tests" in {
     import org.apache.avro.compiler.specific.SpecificCompiler
     import java.io.File
     import org.apache.avro.Schema
@@ -112,7 +112,7 @@ class AvroSupportSpec extends FlatSpec with Matchers {
 
     System.setProperty(
       "org.apache.avro.specific.templates",
-      "avro-utils/src/main/scala/com/mazeboard/avro/compiler/specific/templates/java/spark/")
+      "avro-utils/src/main/templates/avro/java/")
 
     //SpecificCompiler.compileSchema(src, dest)
 
@@ -129,7 +129,7 @@ class AvroSupportSpec extends FlatSpec with Matchers {
     val compiler = new SpecificCompiler(schema)
     compiler.setStringType(StringType.valueOf("String"))
     compiler.compileToDestination(null, dest)
-  }
+  }*/
 
   "avro User reader/writer" must "pass tests" in {
     import org.apache.avro.generic.GenericRecord

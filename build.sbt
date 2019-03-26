@@ -8,7 +8,8 @@ val workaround = {
   ()
 }
 
-javacOptions in avroUtils ++= Seq("-parameters")
+val avroSettings = Seq(javaSource in AvroConfig := (sourceManaged in Compile).value,
+  AvroConfig / stringType := "String")
 
 val resolutionRepos = Seq(
   "mvnrepo" at "https://mvnrepository.com"
@@ -25,7 +26,7 @@ lazy val root = (project in file(".") withId "mazeboard")
       organization := "com.mazeboard",
       version := "0.1.0-SNAPSHOT",
       scalaVersion := "2.12.7",
-      resolvers ++= resolutionRepos, 
+      resolvers ++= resolutionRepos,
       IntegrationTest / parallelExecution  := false,
       scalacOptions ++= Seq(
         "-deprecation",
@@ -104,14 +105,20 @@ lazy val sparkUtils = (project in file("spark-utils"))
     libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % Test
   )
 
+val x = {
+  System.setProperty("org.apache.avro.specific.templates", "avro-utils/src/main/templates/avro/java/")
+}
+
 lazy val avroUtils = (project in file("avro-utils"))
   .dependsOn(configReader)
   .settings(
     name := "avro-utils",
+    javacOptions ++= Seq("-parameters"),
     libraryDependencies += "org.scala-lang" % "scala-reflect" % scalaVersion.value,
-    libraryDependencies += "com.thoughtworks.paranamer" % "paranamer" % "2.6",
-    libraryDependencies += "org.apache.avro" % "avro-tools" % "1.8.2" exclude ("com.thoughtworks.paranamer","paranamer"),
-    libraryDependencies += "org.apache.spark" %% "spark-sql" % "2.4.0" exclude ("com.thoughtworks.paranamer","paranamer"),
+    libraryDependencies += "org.apache.spark" %% "spark-sql" % "2.4.0",
     libraryDependencies += "com.databricks" % "spark-avro_2.11" % "4.0.0",
-    libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % Test
+    libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % Test,
+    avroSettings
   )
+
+SbtAvro.projectSettings
