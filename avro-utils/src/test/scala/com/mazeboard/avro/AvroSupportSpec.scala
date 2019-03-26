@@ -204,25 +204,49 @@ class AvroSupportSpec extends FlatSpec with Matchers {
 
     implicit val userEncoder = ExpressionEncoder[User]()
 
-    val foo = User.newBuilder()
-      .setName("Foo")
-      .setFavoriteNumber(7)
-      .setFavoriteColor("red")
-      .build()
-    val bar = User.newBuilder()
+    val ds: Dataset[User] = 0.until(10000).map(i => User.newBuilder()
       .setName("Bar")
-      .setFavoriteNumber(5)
+      .setFavoriteNumber(i)
       .setFavoriteColor("green")
-      .build()
-
-    val ds: Dataset[User] = List(foo, bar).toDS()
+      .build()).toDS()
 
     val x = ds.map(x => {
       (x.getName(), x.getFavoriteColor(), x.getFavoriteNumber())
-    }).collect().toList
+    })
 
-    println(x.size)
-    println(x)
+    val count = x.count()
+
+    println(s"count: $count head: ${x.collect().toList.head}")
+
+  }
+
+  "avro Barcode implicit encoder" must "pass tests" in {
+    import referential.product.v2.Barcode
+    import common.lib.v1.Money
+    import common.lib.v1.Currency
+    import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder
+    import org.apache.spark.sql.Dataset
+
+    val spark = SparkSession.builder.master("local[2]").getOrCreate()
+    import spark.implicits._
+
+    implicit val barcodeEncoder = ExpressionEncoder[Barcode]()
+
+    val ds: Dataset[Barcode] = 0.until(10000).map(i => Barcode.newBuilder()
+      .setBarcode("Bar")
+      .setPrdTaxVal(Money.newBuilder().setUnscaledAmount(1L).build)
+      .build())
+      .toDS()
+
+    val x = ds.map(x => {
+      (
+        x.getBarcode(),
+        x.getPrdTaxVal())
+    })
+
+    val count = x.count()
+
+    println(s"count: $count head: ${x.collect().toList.head}")
 
   }
 
@@ -232,17 +256,15 @@ class AvroSupportSpec extends FlatSpec with Matchers {
     val spark = SparkSession.builder.master("local[2]").getOrCreate()
     import spark.implicits._
 
-    val foo = XUser("Foo", 7, "red")
-    val bar = XUser("Bar", 5, "green")
-
-    val ds: Dataset[XUser] = spark.sparkContext.parallelize(List(foo, bar)).toDS()
+    val ds: Dataset[XUser] = 0.until(10000).map(i => XUser("Foo", i, "green")).toDS()
 
     val x = ds.map(x => {
       (x.name, x.favorite_color, x.favorite_number)
-    }).collect().toList
+    })
 
-    println(x.size)
-    println(x)
+    val count = x.count()
+
+    println(s"count: $count head: ${x.collect().toList.head}")
 
   }
 

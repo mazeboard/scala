@@ -120,5 +120,3 @@ lazy val avroUtils = (project in file("avro-utils"))
     libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % Test,
     avroSettings
   )
-
-SbtAvro.projectSettings
