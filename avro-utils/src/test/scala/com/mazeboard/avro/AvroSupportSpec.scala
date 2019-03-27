@@ -238,23 +238,25 @@ class AvroSupportSpec extends FlatSpec with Matchers {
 
     // enum Currency, new common.lib.v1.Currency() ?
 
+    println(ScalaReflection.getConstructorParameters(typeOf[Barcode]))
     implicit val barcodeEncoder = ExpressionEncoder[Barcode]()
 
-    val ds: Dataset[Barcode] = 0.until(10000).map(i => Barcode.newBuilder()
-      .setBarcode("Bar")
-      .setPrdTaxVal(Money.newBuilder().setUnscaledAmount(1L).setCurrency(Currency.EUR).build)
-      .build())
+    val ds: Dataset[Barcode] = 0.until(10000).map(i => {
+      val barcode = Barcode.newBuilder()
+        .setBarcode("Bar")
+        .setPrdTaxVal(Money.newBuilder().setUnscaledAmount(1L).setCurrency(Currency.EUR).build)
+        .build()
+      barcode
+    })
       .toDS()
 
-    val x = ds.map(x => {
+    val x = ds.map(a => {
       (
-        x.getBarcode(),
-        x.getPrdTaxVal())
+        a.getBarcode(),
+        a.getPrdTaxVal())
     })
 
-    val count = x.count()
-
-    println(s"count: $count head: ${x.collect().toList.head}")
+    println(s"head: ${x.collect().toList.head}")
 
   }
 

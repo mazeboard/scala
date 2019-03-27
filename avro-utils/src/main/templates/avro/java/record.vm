@@ -21,6 +21,11 @@ package $schema.getNamespace();
 
 import org.apache.avro.specific.SpecificData;
 import org.apache.spark.sql.catalyst.DefinedByConstructorParams;
+import com.mazeboard.avro.AsScala;
+import com.mazeboard.avro.AsJava;
+import org.json4s.reflect.PrimaryConstructor;
+import scala.collection.Seq;
+import scala.collection.Map;
 #if (!$schema.isError())
 import org.apache.avro.message.BinaryMessageEncoder;
 import org.apache.avro.message.BinaryMessageDecoder;
@@ -84,7 +89,15 @@ public class ${this.mangle($schema.getName())}#if ($schema.isError()) extends or
   @$annotation
 #end
   #if (${this.deprecatedFields()})@Deprecated#end #if (${this.publicFields()})public#elseif (${this.privateFields()})private#end ${this.javaUnbox($field.schema())} ${this.mangle($field.name(), $schema.isError())};
+  #if (${this.javaUnbox($field.schema())} == "java.util.List")
+  public ${this.javaUnbox($field.schema())} ${this.mangle($field.name(), $schema.isError())}() { return AsJava.toList(this.${this.mangle($field.name(), $schema.isError())}); }
+  #else
+  #if (${this.javaUnbox($field.schema())} == "java.util.Map")
+  public ${this.javaUnbox($field.schema())} ${this.mangle($field.name(), $schema.isError())}() { return AsJava.toMap(this.${this.mangle($field.name(), $schema.isError())}); }
+  #else
   public ${this.javaUnbox($field.schema())} ${this.mangle($field.name(), $schema.isError())}() { return this.${this.mangle($field.name(), $schema.isError())}; }
+  #end
+  #end
 #end
 #if ($schema.isError())
 
@@ -107,6 +120,12 @@ public class ${this.mangle($schema.getName())}#if ($schema.isError()) extends or
 #else
 #if ($schema.getFields().size() > 0)
 
+  /**
+   * Default constructor.  Note that this does not initialize fields
+   * to their default values from the schema.  If that is desired then
+   * one should use <code>newBuilder()</code>.
+   */
+  public ${this.mangle($schema.getName())}() {}
 #if ($this.isCreateAllArgsConstructor())
 
   /**
@@ -117,9 +136,18 @@ public class ${this.mangle($schema.getName())}#if ($schema.isError()) extends or
 #end
 #end
    */
-  public ${this.mangle($schema.getName())}(#foreach($field in $schema.getFields())${this.javaType($field.schema())} ${this.mangle($field.name())}#if($velocityCount < $schema.getFields().size()), #end#end) {
+  @PrimaryConstructor
+  public ${this.mangle($schema.getName())}(#foreach($field in $schema.getFields())#if(${this.javaType($field.schema())} == "java.util.List")Seq#else #if(${this.javaType($field.schema())} == "java.util.Map") Map#else ${this.javaType($field.schema())}#end#end${this.mangle($field.name())}#if($velocityCount < $schema.getFields().size()), #end#end) {
 #foreach ($field in $schema.getFields())
+    #if(${this.javaType($field.schema())} == "java.util.List")
+    this.${this.mangle($field.name())} = AsJava.toList(${this.mangle($field.name())});
+    #else
+    #if(${this.javaType($field.schema())} == "java.util.Map")
+    this.${this.mangle($field.name())} = AsJava.toMap(${this.mangle($field.name())});
+    #else
     this.${this.mangle($field.name())} = ${this.mangle($field.name())};
+    #end
+    #end
 #end
   }
 #else
@@ -416,28 +444,27 @@ public class ${this.mangle($schema.getName())}#if ($schema.isError()) extends or
     @SuppressWarnings("unchecked")
     public ${this.mangle($schema.getName())} build() {
       try {
-        return new ${this.mangle($schema.getName())}(
+        ${this.mangle($schema.getName())} record = new ${this.mangle($schema.getName())}(#if ($schema.isError())getValue(), getCause()#end);
 #foreach ($field in $schema.getFields())
 #if (${this.hasBuilder($field.schema())})
-        (${this.mangle($field.name(), $schema.isError())}Builder != null) ?
-          this.${this.mangle($field.name(), $schema.isError())}Builder.build() :
+        if (${this.mangle($field.name(), $schema.isError())}Builder != null) {
+          record.${this.mangle($field.name(), $schema.isError())} = this.${this.mangle($field.name(), $schema.isError())}Builder.build();
+        } else {
 #if ($this.hasLogicalTypeField($schema))
-          (fieldSetFlags()[$field.pos()] ? this.${this.mangle($field.name(), $schema.isError())} : (${this.javaType($field.schema())}) defaultValue(fields()[$field.pos()], record.getConversion($field.pos())))
+          record.${this.mangle($field.name(), $schema.isError())} = fieldSetFlags()[$field.pos()] ? this.${this.mangle($field.name(), $schema.isError())} : (${this.javaType($field.schema())}) defaultValue(fields()[$field.pos()], record.getConversion($field.pos()));
 #else
-          (fieldSetFlags()[$field.pos()] ? this.${this.mangle($field.name(), $schema.isError())} : (${this.javaType($field.schema())}) defaultValue(fields()[$field.pos()]))
+          record.${this.mangle($field.name(), $schema.isError())} = fieldSetFlags()[$field.pos()] ? this.${this.mangle($field.name(), $schema.isError())} : (${this.javaType($field.schema())}) defaultValue(fields()[$field.pos()]);
 #end
+        }
 #else
 #if ($this.hasLogicalTypeField($schema))
-        fieldSetFlags()[$field.pos()] ? this.${this.mangle($field.name(), $schema.isError())} : (${this.javaType($field.schema())}) defaultValue(fields()[$field.pos()], record.getConversion($field.pos()))
+        record.${this.mangle($field.name(), $schema.isError())} = fieldSetFlags()[$field.pos()] ? this.${this.mangle($field.name(), $schema.isError())} : (${this.javaType($field.schema())}) defaultValue(fields()[$field.pos()], record.getConversion($field.pos()));
 #else
-        fieldSetFlags()[$field.pos()] ? this.${this.mangle($field.name(), $schema.isError())} : (${this.javaType($field.schema())}) defaultValue(fields()[$field.pos()])
+        record.${this.mangle($field.name(), $schema.isError())} = fieldSetFlags()[$field.pos()] ? this.${this.mangle($field.name(), $schema.isError())} : (${this.javaType($field.schema())}) defaultValue(fields()[$field.pos()]);
 #end
 #end
-#if ($field.pos() < $schema.getFields().size() - 1)
-   ,
 #end
-#end
-    );
+        return record;
       } catch (java.lang.Exception e) {
         throw new org.apache.avro.AvroRuntimeException(e);
       }
