@@ -1,7 +1,7 @@
 package com.mazeboard.avro
 
 object AsScala {
-  def toList[T](list: java.util.List[T]): List[T] = {
+  def toList[T](list: java.util.List[T]): Seq[T] = {
     val buf = scala.collection.mutable.ListBuffer.empty[T]
     val iter = list.listIterator()
     while (iter.hasNext) {
