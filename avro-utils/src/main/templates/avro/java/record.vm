@@ -89,14 +89,9 @@ public class ${this.mangle($schema.getName())}#if ($schema.isError()) extends or
   @$annotation
 #end
   #if (${this.deprecatedFields()})@Deprecated#end #if (${this.publicFields()})public#elseif (${this.privateFields()})private#end ${this.javaUnbox($field.schema())} ${this.mangle($field.name(), $schema.isError())};
-  #if (${this.javaUnbox($field.schema())} == "java.util.List")
-  public ${this.javaUnbox($field.schema())} ${this.mangle($field.name(), $schema.isError())}() { return AsJava.toList(this.${this.mangle($field.name(), $schema.isError())}); }
-  #else
-  #if (${this.javaUnbox($field.schema())} == "java.util.Map")
-  public ${this.javaUnbox($field.schema())} ${this.mangle($field.name(), $schema.isError())}() { return AsJava.toMap(this.${this.mangle($field.name(), $schema.isError())}); }
-  #else
-  public ${this.javaUnbox($field.schema())} ${this.mangle($field.name(), $schema.isError())}() { return this.${this.mangle($field.name(), $schema.isError())}; }
-  #end
+  #if ($field.schema().getType().getName() == "ARRAY")public ${this.javaUnbox($field.schema())} ${this.mangle($field.name(), $schema.isError())}() { return AsScala.toList(this.${this.mangle($field.name(), $schema.isError())}); }
+  #elseif ($field.schema().getType().getName() == "MAP")public ${this.javaUnbox($field.schema())} ${this.mangle($field.name(), $schema.isError())}() { return AsScala.toMap(this.${this.mangle($field.name(), $schema.isError())}); }
+  #else public ${this.javaUnbox($field.schema())} ${this.mangle($field.name(), $schema.isError())}() { return this.${this.mangle($field.name(), $schema.isError())}; }
   #end
 #end
 #if ($schema.isError())
@@ -137,16 +132,11 @@ public class ${this.mangle($schema.getName())}#if ($schema.isError()) extends or
 #end
    */
   @PrimaryConstructor
-  public ${this.mangle($schema.getName())}(#foreach($field in $schema.getFields())#if(${this.javaType($field.schema())} == "java.util.List")Seq#else #if(${this.javaType($field.schema())} == "java.util.Map") Map#else ${this.javaType($field.schema())}#end#end${this.mangle($field.name())}#if($velocityCount < $schema.getFields().size()), #end#end) {
+##  public ${this.mangle($schema.getName())}(#foreach($field in $schema.getFields())#if(${field.schema().getType().getName()} == "ARRAY") Seq<${this.javaType($field.schema()).substring(15,this.javaType($field.schema()).length-1)}>#else #if(${field.schema().getType().getName()} == "MAP") Map<${this.javaType($field.schema()).substring(14,this.javaType($field.schema()).length-1)}>#else ${this.javaType($field.schema())}#end#end ${this.mangle($field.name())}#if($velocityCount < $schema.getFields().size()), #end#end) {
 #foreach ($field in $schema.getFields())
-    #if(${this.javaType($field.schema())} == "java.util.List")
-    this.${this.mangle($field.name())} = AsJava.toList(${this.mangle($field.name())});
-    #else
-    #if(${this.javaType($field.schema())} == "java.util.Map")
-    this.${this.mangle($field.name())} = AsJava.toMap(${this.mangle($field.name())});
-    #else
-    this.${this.mangle($field.name())} = ${this.mangle($field.name())};
-    #end
+    #if($field.schema().getType().getName() == "ARRAY")this.${this.mangle($field.name())} = AsJava.toList(${this.mangle($field.name())});
+    #elseif ($field.schema().getType().getName() == "MAP")this.${this.mangle($field.name())} = AsJava.toMap(${this.mangle($field.name())});
+    #else this.${this.mangle($field.name())} = ${this.mangle($field.name())};
     #end
 #end
   }
