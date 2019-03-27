@@ -1,7 +1,7 @@
 package com.mazeboard.avro
 
 object AsScala {
-  def toList[T](list: java.util.List[T]): Seq[T] = {
+  def toList[T](list: java.util.List[T]): scala.collection.immutable.List[T] = {
     val buf = scala.collection.mutable.ListBuffer.empty[T]
     val iter = list.listIterator()
     while (iter.hasNext) {
@@ -10,7 +10,7 @@ object AsScala {
     buf.toList
   }
 
-  def toMap[K, V](m: java.util.Map[K, V]): Map[K, V] = {
+  def toMap[K, V](m: java.util.Map[K, V]): scala.collection.immutable.Map[K, V] = {
     val buf = new scala.collection.mutable.HashMap[K, V]()
     val iter = m.entrySet().iterator()
     while (iter.hasNext) {

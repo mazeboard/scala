@@ -123,6 +123,7 @@ class AvroSupportSpec extends FlatSpec with Matchers {
     //compiler.compileToDestination(null, dest)
     val tt = compiler.javaUnbox(schema.getField("crpAttributes").schema())
     println(tt)
+    List
     schema.getType().values()
     val a:java.lang.String = "java.util.List<Integer>"
     a.indexOf("java.util.List<")

@@ -21,11 +21,9 @@ package $schema.getNamespace();
 
 import org.apache.avro.specific.SpecificData;
 import org.apache.spark.sql.catalyst.DefinedByConstructorParams;
-import com.mazeboard.avro.AsScala;
 import com.mazeboard.avro.AsJava;
+import com.mazeboard.avro.AsScala;
 import org.json4s.reflect.PrimaryConstructor;
-import scala.collection.Seq;
-import scala.collection.Map;
 #if (!$schema.isError())
 import org.apache.avro.message.BinaryMessageEncoder;
 import org.apache.avro.message.BinaryMessageDecoder;
@@ -89,8 +87,8 @@ public class ${this.mangle($schema.getName())}#if ($schema.isError()) extends or
   @$annotation
 #end
   #if (${this.deprecatedFields()})@Deprecated#end #if (${this.publicFields()})public#elseif (${this.privateFields()})private#end ${this.javaUnbox($field.schema())} ${this.mangle($field.name(), $schema.isError())};
-  #if (${this.javaUnbox($field.schema()).indexOf("java.util.List<")} == 0)public scala.collection.Seq${this.javaType($field.schema()).substring(14,${this.javaType($field.schema()).length()})} ${this.mangle($field.name(), $schema.isError())}() { return AsScala.toList${this.javaType($field.schema()).substring(14,${this.javaType($field.schema()).length()})}(this.${this.mangle($field.name(), $schema.isError())}); }
-  #elseif (${this.javaUnbox($field.schema()).indexOf("java.util.Map<")} == 0)public scala.collection.Map${this.javaType($field.schema()).substring(13,${this.javaType($field.schema()).length()})} ${this.mangle($field.name(), $schema.isError())}() { return AsScala.toMap${this.javaType($field.schema()).substring(13,${this.javaType($field.schema()).length()})}(this.${this.mangle($field.name(), $schema.isError())}); }
+  #if (${this.javaUnbox($field.schema()).indexOf("java.util.List<")} == 0)public scala.collection.immutable.List${this.javaType($field.schema()).substring(14,${this.javaType($field.schema()).length()})} ${this.mangle($field.name(), $schema.isError())}() { return AsScala.toList${this.javaType($field.schema()).substring(14,${this.javaType($field.schema()).length()})}(this.${this.mangle($field.name(), $schema.isError())}); }
+  #elseif (${this.javaUnbox($field.schema()).indexOf("java.util.Map<")} == 0)public scala.collection.immutable.Map${this.javaType($field.schema()).substring(13,${this.javaType($field.schema()).length()})} ${this.mangle($field.name(), $schema.isError())}() { return AsScala.toMap${this.javaType($field.schema()).substring(13,${this.javaType($field.schema()).length()})}(this.${this.mangle($field.name(), $schema.isError())}); }
   #else public ${this.javaUnbox($field.schema())} ${this.mangle($field.name(), $schema.isError())}() { return this.${this.mangle($field.name(), $schema.isError())}; }
   #end
 #end
@@ -134,8 +132,8 @@ public class ${this.mangle($schema.getName())}#if ($schema.isError()) extends or
   @PrimaryConstructor
   public ${this.mangle($schema.getName())}(
   #foreach($field in $schema.getFields())
-     #if(${this.javaUnbox($field.schema()).indexOf("java.util.List<")} == 0) scala.collection.Seq${this.javaType($field.schema()).substring(14,${this.javaType($field.schema()).length()})}
-     #elseif(${this.javaUnbox($field.schema()).indexOf("java.util.Map<")} == 0) scala.collection.Map${this.javaType($field.schema()).substring(13,${this.javaType($field.schema()).length()})}
+     #if(${this.javaUnbox($field.schema()).indexOf("java.util.List<")} == 0) scala.collection.immutable.List${this.javaType($field.schema()).substring(14,${this.javaType($field.schema()).length()})}
+     #elseif(${this.javaUnbox($field.schema()).indexOf("java.util.Map<")} == 0) scala.collection.immutable.Map${this.javaType($field.schema()).substring(13,${this.javaType($field.schema()).length()})}
      #else ${this.javaType($field.schema())}#end ${this.mangle($field.name())}#if($velocityCount < $schema.getFields().size()), #end
    #end) {
 #foreach ($field in $schema.getFields())
