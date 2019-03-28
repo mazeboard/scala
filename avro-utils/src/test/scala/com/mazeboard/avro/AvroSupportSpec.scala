@@ -221,6 +221,7 @@ class AvroSupportSpec extends FlatSpec with Matchers {
     import common.lib.v1.Money
     import common.lib.v1.Currency
     import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder
+    import org.apache.spark.sql.Encoders
     import org.apache.spark.sql.Dataset
 
     val spark = SparkSession.builder.master("local[2]").getOrCreate()
@@ -229,6 +230,8 @@ class AvroSupportSpec extends FlatSpec with Matchers {
     // enum Currency, new common.lib.v1.Currency() ?
 
     println("getConstructorParameters", ScalaReflection.getConstructorParameters(typeOf[Barcode]))
+    //implicit val currencyEncoder = Encoders.kryo[Currency] // does not work for enum ? (No Encoder found for common.lib.v1.Currency)
+    //implicit val barcodeEncoder = Encoders.kryo[Barcode]
     implicit val barcodeEncoder = ExpressionEncoder[Barcode]()
 
     val ds: Dataset[Barcode] = 0.until(10000).map(i => {
@@ -249,12 +252,12 @@ class AvroSupportSpec extends FlatSpec with Matchers {
         .build())
       val barcode = Barcode.newBuilder()
         .setBarcode(s"Bar$i")
-        /*.setPrdTaxVal(Money.newBuilder()
+        .setPrdTaxVal(Money.newBuilder()
           .setUnscaledAmount(i.toLong)
           .setScale(0)
           .setCurrency(Currency.EUR)
           .setCurrencyAlphaCode("EUR")
-          .build())*/
+          .build())
         .setCrpAttributes(crpAttrs)
         .build()
       barcode
