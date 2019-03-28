@@ -87,8 +87,8 @@ public class ${this.mangle($schema.getName())}#if ($schema.isError()) extends or
   @$annotation
 #end
   #if (${this.deprecatedFields()})@Deprecated#end #if (${this.publicFields()})public#elseif (${this.privateFields()})private#end ${this.javaUnbox($field.schema())} ${this.mangle($field.name(), $schema.isError())};
-  #if (${this.javaUnbox($field.schema()).indexOf("java.util.List<")} == 0)public scala.collection.immutable.List${this.javaUnbox($field.schema()).substring(14,${this.javaUnbox($field.schema()).length()})} ${this.mangle($field.name(), $schema.isError())}() { return AsScala.toList(this.${this.mangle($field.name(), $schema.isError())}); }
-  #elseif (${this.javaUnbox($field.schema()).indexOf("java.util.Map<")} == 0)public scala.collection.immutable.Map${this.javaUnbox($field.schema()).substring(13,${this.javaUnbox($field.schema()).length()})} ${this.mangle($field.name(), $schema.isError())}() { return AsScala.toMap(this.${this.mangle($field.name(), $schema.isError())}); }
+  #if (${this.javaUnbox($field.schema()).indexOf("java.util.List<")} == 0)public scala.collection.immutable.List${this.javaUnbox($field.schema()).substring(14,${this.javaUnbox($field.schema()).length()})} ${this.mangle($field.name(), $schema.isError())}() { return AsScala.toList${this.javaType($field.schema()).substring(14,${this.javaType($field.schema()).length()})}(this.${this.mangle($field.name(), $schema.isError())}); }
+  #elseif (${this.javaUnbox($field.schema()).indexOf("java.util.Map<")} == 0)public scala.collection.immutable.Map${this.javaUnbox($field.schema()).substring(13,${this.javaUnbox($field.schema()).length()})} ${this.mangle($field.name(), $schema.isError())}() { return AsScala.toMap${this.javaType($field.schema()).substring(13,${this.javaType($field.schema()).length()})}(this.${this.mangle($field.name(), $schema.isError())}); }
   #else public ${this.javaUnbox($field.schema())} ${this.mangle($field.name(), $schema.isError())}() { return this.${this.mangle($field.name(), $schema.isError())}; }
   #end
 #end
@@ -131,8 +131,8 @@ public class ${this.mangle($schema.getName())}#if ($schema.isError()) extends or
      #else ${this.javaUnbox($field.schema())}#end ${this.mangle($field.name())}#if($velocityCount < $schema.getFields().size()), #end
    #end) {
 #foreach ($field in $schema.getFields())
-    #if(${this.javaUnbox($field.schema()).indexOf("java.util.List<")} == 0)this.${this.mangle($field.name())} = AsJava.toList(${this.mangle($field.name())});
-    #elseif (${this.javaUnbox($field.schema()).indexOf("java.util.Map<")} == 0)this.${this.mangle($field.name())} = AsJava.toMap(${this.mangle($field.name())});
+    #if(${this.javaUnbox($field.schema()).indexOf("java.util.List<")} == 0)this.${this.mangle($field.name())} = AsJava.toList${this.javaType($field.schema()).substring(14,${this.javaType($field.schema()).length()})}(${this.mangle($field.name())});
+    #elseif (${this.javaUnbox($field.schema()).indexOf("java.util.Map<")} == 0)this.${this.mangle($field.name())} = AsJava.toMap${this.javaType($field.schema()).substring(13,${this.javaType($field.schema()).length()})}(${this.mangle($field.name())});
     #else this.${this.mangle($field.name())} = ${this.mangle($field.name())};
     #end
 #end

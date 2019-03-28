@@ -18,6 +18,7 @@ import scala.reflect.api
 import scala.reflect.runtime.universe._
 import scala.reflect.runtime.currentMirror
 import org.apache.spark.sql.types._
+import referential.product.v2.{ CrpAddDesc, CrpAttributes }
 
 class AvroSupportSpec extends FlatSpec with Matchers {
 
@@ -101,7 +102,7 @@ class AvroSupportSpec extends FlatSpec with Matchers {
     }
   }
 
-  "avro compile avro schema" must "pass tests" in {
+  /*"avro compile avro schema" must "pass tests" in {
     import org.apache.avro.compiler.specific.SpecificCompiler
     import java.io.File
     import org.apache.avro.Schema
@@ -123,11 +124,7 @@ class AvroSupportSpec extends FlatSpec with Matchers {
     //compiler.compileToDestination(null, dest)
     val tt = compiler.javaUnbox(schema.getField("crpAttributes").schema())
     println(tt)
-    List
-    schema.getType().values()
-    val a:java.lang.String = "java.util.List<Integer>"
-    a.indexOf("java.util.List<")
-  }
+  }*/
 
   "avro User reader/writer" must "pass tests" in {
     import org.apache.avro.generic.GenericRecord
@@ -224,25 +221,41 @@ class AvroSupportSpec extends FlatSpec with Matchers {
     import common.lib.v1.Money
     import common.lib.v1.Currency
     import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder
-    import org.apache.spark.sql.Encoders
     import org.apache.spark.sql.Dataset
-    import scala.reflect.ClassTag
 
     val spark = SparkSession.builder.master("local[2]").getOrCreate()
     import spark.implicits._
 
-    // no implicit encoder for java.util.List[_], replace, in record.vm,  by scala.collection.Seq ?
-    // no implicit encoder for java.util.Map[_,_], replace,  in record.vm, by scala.collection.Map ?
-
     // enum Currency, new common.lib.v1.Currency() ?
 
-    println(ScalaReflection.getConstructorParameters(typeOf[Barcode]))
+    println("getConstructorParameters", ScalaReflection.getConstructorParameters(typeOf[Barcode]))
     implicit val barcodeEncoder = ExpressionEncoder[Barcode]()
 
     val ds: Dataset[Barcode] = 0.until(10000).map(i => {
+      val crpAddDesc = new java.util.ArrayList[CrpAddDesc]()
+      crpAddDesc.add(CrpAddDesc.newBuilder()
+        .setCrpAddEngDesc(s"Crp description1 $i")
+        .build())
+      crpAddDesc.add(CrpAddDesc.newBuilder()
+        .setCrpAddEngDesc(s"Crp description2 $i")
+        .build())
+      val crpAttrs = new java.util.ArrayList[CrpAttributes]()
+      crpAttrs.add(CrpAttributes.newBuilder()
+        .setCrpCode(s"crp attr1 $i")
+        .setCrpAddDesc(crpAddDesc)
+        .build())
+      crpAttrs.add(CrpAttributes.newBuilder()
+        .setCrpCode(s"crp attr2 $i")
+        .build())
       val barcode = Barcode.newBuilder()
-        .setBarcode("Bar")
-        .setPrdTaxVal(Money.newBuilder().setUnscaledAmount(1L).setCurrency(Currency.EUR).build)
+        .setBarcode(s"Bar$i")
+        /*.setPrdTaxVal(Money.newBuilder()
+          .setUnscaledAmount(i.toLong)
+          .setScale(0)
+          .setCurrency(Currency.EUR)
+          .setCurrencyAlphaCode("EUR")
+          .build())*/
+        .setCrpAttributes(crpAttrs)
         .build()
       barcode
     })
@@ -250,11 +263,12 @@ class AvroSupportSpec extends FlatSpec with Matchers {
 
     val x = ds.map(a => {
       (
-        a.getBarcode(),
-        a.getPrdTaxVal())
+        a.barcode(),
+        a.prdTaxVal(),
+        a.crpAttributes())
     })
 
-    println(s"head: ${x.collect().toList.head}")
+    println(x.collect().toList.drop(100).head)
 
   }
 
