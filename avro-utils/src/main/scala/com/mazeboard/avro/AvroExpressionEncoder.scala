@@ -1,23 +1,23 @@
 package com.mazeboard.avro
 
 import scala.reflect.ClassTag
-import scala.reflect.runtime.universe.{TypeTag, typeTag}
+import scala.reflect.runtime.universe.{ TypeTag, typeTag }
 import scala.reflect.api._
 import scala.reflect.api.universe._
 import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder
 import org.apache.avro.specific.SpecificRecordBase
-import org.apache.spark.sql.catalyst.{ScalaReflection, expressions}
-import org.apache.spark.sql.catalyst.ScalaReflection.{arrayClassFor, deserializerFor, javaKeywords, serializerFor, _}
-import org.apache.spark.sql.catalyst.analysis.{GetColumnByOrdinal, UnresolvedAttribute, UnresolvedExtractValue}
-import org.apache.spark.sql.catalyst.expressions.{BoundReference, CreateNamedStruct, Expression, GetStructField, IsNull, UnsafeArrayData, UpCast}
+import org.apache.spark.sql.catalyst.{ ScalaReflection, expressions }
+import org.apache.spark.sql.catalyst.ScalaReflection.{ arrayClassFor, deserializerFor, javaKeywords, serializerFor, _ }
+import org.apache.spark.sql.catalyst.analysis.{ GetColumnByOrdinal, UnresolvedAttribute, UnresolvedExtractValue }
+import org.apache.spark.sql.catalyst.expressions.{ BoundReference, CreateNamedStruct, Expression, GetStructField, IsNull, UnsafeArrayData, UpCast }
 import org.apache.spark.sql.catalyst.expressions.objects._
-import org.apache.spark.sql.catalyst.util.{DateTimeUtils, GenericArrayData}
+import org.apache.spark.sql.catalyst.util.{ DateTimeUtils, GenericArrayData }
 import org.apache.spark.sql.types._
 import org.apache.spark.unsafe.types.UTF8String
 import scala.collection.Map
 
 object AvroExpressionEncoder {
-  def apply[T <: SpecificRecordBase : TypeTag](): ExpressionEncoder[T] = {
+  def apply[T <: SpecificRecordBase: TypeTag](): ExpressionEncoder[T] = {
     // We convert the not-serializable TypeTag into StructType and ClassTag.
     val mirror = ScalaReflection.mirror
     val tpe = typeTag[T].in(mirror).tpe
@@ -39,20 +39,20 @@ object AvroExpressionEncoder {
       ClassTag[T](cls))
   }
 
-  def serializerFor[T <: SpecificRecordBase : TypeTag](inputObject: Expression): CreateNamedStruct = {
+  def serializerFor[T <: SpecificRecordBase: TypeTag](inputObject: Expression): CreateNamedStruct = {
     val tpe = localTypeOf[T]
     val clsName = getClassNameFromType(tpe)
     val walkedTypePath = s"""- root class: "$clsName"""" :: Nil
     serializerFor(inputObject, tpe, walkedTypePath) match {
-      case expressions.If(_, _, s: CreateNamedStruct)  => s
+      case expressions.If(_, _, s: CreateNamedStruct) => s
     }
   }
 
   private def serializerFor(
-                             inputObject: Expression,
-                             tpe: `Type`,
-                             walkedTypePath: Seq[String],
-                             seenTypeSet: Set[`Type`] = Set.empty): Expression = cleanUpReflectionObjects {
+    inputObject: Expression,
+    tpe: `Type`,
+    walkedTypePath: Seq[String],
+    seenTypeSet: Set[`Type`] = Set.empty): Expression = cleanUpReflectionObjects {
     tpe.dealias match {
       case t if t <:< SpecificRecordBase => {
 
@@ -66,7 +66,7 @@ object AvroExpressionEncoder {
     }
   }
 
-  def deserializerFor[T : TypeTag]: Expression = {
+  def deserializerFor[T: TypeTag]: Expression = {
     val tpe = localTypeOf[T]
     val clsName = getClassNameFromType(tpe)
     val walkedTypePath = s"""- root class: "$clsName"""" :: Nil

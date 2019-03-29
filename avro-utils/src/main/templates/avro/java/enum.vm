@@ -27,9 +27,15 @@ import org.apache.spark.sql.catalyst.DefinedByConstructorParams;
 @$annotation
 #end
 @org.apache.avro.specific.AvroGenerated
-public enum ${this.mangle($schema.getName())} implements DefinedByConstructorParams {
-  #foreach ($symbol in ${schema.getEnumSymbols()})${this.mangle($symbol)}#if ($velocityHasNext), #end#end
-  ;
+public class ${this.mangle($schema.getName())} implements DefinedByConstructorParams {
+#define($enum)  public static ${this.mangle($schema.getName())} ${this.mangle($symbol)} = new ${this.mangle($schema.getName())}("${this.mangle($symbol)}");
+#end
+#foreach ($symbol in ${schema.getEnumSymbols()})$enum#end
+  public java.lang.String value;
+  public ${this.mangle($schema.getName())}(java.lang.String value) {
+    this.value = value;
+  }
+  public String value() { return this.value; }
   public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("${this.javaEscape($schema.toString())}");
   public static org.apache.avro.Schema getClassSchema() { return SCHEMA$; }
 }
