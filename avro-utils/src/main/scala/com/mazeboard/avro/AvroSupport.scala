@@ -1,9 +1,12 @@
 package com.mazeboard.avro
 
 import org.apache.avro.specific.SpecificRecordBase
+import org.apache.spark.sql.catalyst.ScalaReflection
+import org.apache.spark.sql.catalyst.expressions.BoundReference
+import org.apache.spark.sql.catalyst.expressions.objects.AssertNotNull
 
 import scala.language.experimental.macros
-import scala.reflect.api
+import scala.reflect.{ ClassTag, api }
 import scala.reflect.macros.blackbox.Context
 import scala.reflect.runtime.currentMirror
 import scala.reflect.runtime.universe._
@@ -61,70 +64,26 @@ object AvroSupport {
     def load[T: TypeTag]: T = _load[T](obj)
   }
 
-  // TODO
+  import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder
 
-  def declare[T <: SpecificRecordBase]: Int = macro declare_Impl[T]
+  def AvroExpressionEncoder[T <: SpecificRecordBase: TypeTag]() = {
+    // We convert the not-serializable TypeTag into StructType and ClassTag.
+    val mirror = ScalaReflection.mirror
+    val tpe = typeTag[T].in(mirror).tpe
+    val cls = mirror.runtimeClass(tpe)
+    val inputObject = BoundReference(0, ScalaReflection.dataTypeFor[T], nullable = !cls.isPrimitive)
+    val nullSafeInput = AssertNotNull(inputObject, Seq("top level Product input object"))
+    val serializer = ScalaReflection.serializerFor[T](nullSafeInput)
+    val deserializer = ScalaReflection.deserializerFor[T]
 
-  def declare_Impl[T: c.WeakTypeTag](c: Context) = {
-    import c.universe._
-    def termName(x: c.Expr[String]) = x match { case Expr(Literal(Constant(x: String))) => TermName(x) }
-    def typeName(x: c.Expr[String]) = x match { case Expr(Literal(Constant(x: String))) => TypeName(x) }
+    val schema = serializer.dataType
 
-    /*val name = tag match { case Expr(Literal(Constant(xval: String))) => xval }
-      val sym = TypeName(c.freshName(s"_Tag_${name}_"))
-      val typetag = TypeName(name)
-      val termtag = TermName(name)*/
-
-    // if args is empty then declare a case class with all fields in avro type
-    // otherwise declare case class with fields in args (use defaults if provided)
-
-    /*val params = fields.fold("")((a, b) => { // TODO create a list of params (Expr)
-      if (a == "") {
-        s"$b: Int"
-      } else {
-        s"$a, $b: Int"
-      }
-    })*/
-
-    //val q"..$stats" = q"""case class $caseClassName $params"""
-    //q"$stats"
-    //q"""case class ${typeName(caseClassName)} (..$params)"""
-
-    val x = q"""{
-      import org.apache.avro.specific.SpecificRecordBase
-      case class Foo() extends Product {
-        var stoEan: String = _
-        var stoAnabelKey: String = _
-
-        def productArity = 2
-
-        @throws(classOf[IndexOutOfBoundsException])
-        def productElement(n: Int) = n match {
-          case 0 => stoEan
-          case 1 => stoAnabelKey
-          case _ => throw new IndexOutOfBoundsException(n.toString())
-        }
-
-        def canEqual(that: Any): Boolean = {
-          that match {
-            case x: Foo => x.stoEan == this.stoEan && x.stoAnabelKey == this.stoAnabelKey
-            case _ => false
-          }
-        }
-
-
-        def load(obj: SpecificRecordBase): Foo = {
-          val o = new Foo
-          o.stoEan = obj.get("stoEan").asInstanceOf[String]
-          o.stoAnabelKey = obj.get("stoAnabelKey").asInstanceOf[String]
-          o
-        }
-      }
-      val abc:Int=123
-      abc
-    }"""
-    println(x)
-    x
+    new ExpressionEncoder[T](
+      schema,
+      false,
+      serializer.flatten,
+      deserializer,
+      ClassTag[T](cls))
   }
 
 }

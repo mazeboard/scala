@@ -215,6 +215,11 @@ class AvroSupportSpec extends FlatSpec with Matchers {
 
   }
 
+  "avro expression encoder" must "pass tests" in {
+    import referential.product.v2.Barcode
+    implicit val avroEncoder = AvroExpressionEncoder[Barcode]()
+  }
+
   "avro Barcode implicit encoder" must "pass tests" in {
 
     import referential.product.v2.Barcode
