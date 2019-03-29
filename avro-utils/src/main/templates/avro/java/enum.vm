@@ -27,15 +27,51 @@ import org.apache.spark.sql.catalyst.DefinedByConstructorParams;
 @$annotation
 #end
 @org.apache.avro.specific.AvroGenerated
-public class ${this.mangle($schema.getName())} implements DefinedByConstructorParams {
-#define($enum)  public static ${this.mangle($schema.getName())} ${this.mangle($symbol)} = new ${this.mangle($schema.getName())}("${this.mangle($symbol)}");
+public class ${this.mangle($schema.getName())} implements Comparable<${this.mangle($schema.getName())}>, java.io.Serializable, DefinedByConstructorParams {
+#set($size = ${schema.getEnumSymbols().size()} - 1)
+#define($symbols)#foreach ($symbol in ${schema.getEnumSymbols()})$symbol#if(${schema.getEnumOrdinal("$symbol")} < $size),#end#end#end
+#define($enum)  public static ${this.mangle($schema.getName())} ${this.mangle($symbol)} = new ${this.mangle($schema.getName())}("${this.mangle($symbol)}", ${schema.getEnumOrdinal("$symbol")});
 #end
 #foreach ($symbol in ${schema.getEnumSymbols()})$enum#end
-  public java.lang.String value;
-  public ${this.mangle($schema.getName())}(java.lang.String value) {
-    this.value = value;
-  }
-  public String value() { return this.value; }
+    public static ${this.mangle($schema.getName())} valueOf(java.lang.String name) {
+        if (name == null ) throw (new java.lang.NullPointerException());
+        switch(name) {
+#foreach ($symbol in ${schema.getEnumSymbols()})
+            case "$symbol": return $symbol;
+#end
+            default: throw(new java.lang.IllegalArgumentException());
+        }
+    }
+    public static ${this.mangle($schema.getName())} valueOf(${this.mangle($schema.getName())} c, java.lang.String name) {
+        if (c == null || name == null ) throw (new java.lang.NullPointerException());
+        switch(name) {
+#foreach ($symbol in ${schema.getEnumSymbols()})
+            case "$symbol": return $symbol;
+#end
+            default: throw(new java.lang.IllegalArgumentException());
+        }
+    }
+
+    public String name;
+    public int ordinal;
+    public java.util.List<${this.mangle($schema.getName())}> values = java.util.Arrays.asList($symbols);
+
+    public java.util.List<${this.mangle($schema.getName())}> values() {
+        return this.values;
+    }
+
+    public int compareTo(${this.mangle($schema.getName())} other) {
+        return this.ordinal == other.ordinal ? 0 : (this.ordinal < other.ordinal) ? -1 : 1;
+    }
+
+    public ${this.mangle($schema.getName())}(String name, int ordinal) {
+        this.name = name;
+        this.ordinal = ordinal;
+    }
+
+    public String name() { return this.name; }
+    public int ordinal() { return this.ordinal; }
+
   public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("${this.javaEscape($schema.toString())}");
   public static org.apache.avro.Schema getClassSchema() { return SCHEMA$; }
 }

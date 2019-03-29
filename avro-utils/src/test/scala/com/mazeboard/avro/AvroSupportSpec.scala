@@ -229,10 +229,10 @@ class AvroSupportSpec extends FlatSpec with Matchers {
     import org.apache.spark.sql.Encoders
     import org.apache.spark.sql.Dataset
 
-    val curr = Currency.EUR
     val spark = SparkSession.builder.master("local[2]").getOrCreate()
     import spark.implicits._
 
+    org.apache.avro.specific.SpecificFixed
     // enum Currency, new common.lib.v1.Currency() ?
 
     println("getConstructorParameters", ScalaReflection.getConstructorParameters(typeOf[Barcode]))
