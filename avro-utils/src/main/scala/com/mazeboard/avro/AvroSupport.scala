@@ -1,13 +1,9 @@
 package com.mazeboard.avro
 
 import org.apache.avro.specific.SpecificRecordBase
-import org.apache.spark.sql.catalyst.ScalaReflection
-import org.apache.spark.sql.catalyst.expressions.BoundReference
-import org.apache.spark.sql.catalyst.expressions.objects.AssertNotNull
-
+import scala.collection.Map
 import scala.language.experimental.macros
-import scala.reflect.{ ClassTag, api }
-import scala.reflect.macros.blackbox.Context
+import scala.reflect.api
 import scala.reflect.runtime.currentMirror
 import scala.reflect.runtime.universe._
 
@@ -62,28 +58,6 @@ object AvroSupport {
 
   implicit class SpecificRecordBaseSupportRich(obj: SpecificRecordBase) {
     def load[T: TypeTag]: T = _load[T](obj)
-  }
-
-  import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder
-
-  def AvroExpressionEncoder[T <: SpecificRecordBase: TypeTag]() = {
-    // We convert the not-serializable TypeTag into StructType and ClassTag.
-    val mirror = ScalaReflection.mirror
-    val tpe = typeTag[T].in(mirror).tpe
-    val cls = mirror.runtimeClass(tpe)
-    val inputObject = BoundReference(0, ScalaReflection.dataTypeFor[T], nullable = !cls.isPrimitive)
-    val nullSafeInput = AssertNotNull(inputObject, Seq("top level Product input object"))
-    val serializer = ScalaReflection.serializerFor[T](nullSafeInput)
-    val deserializer = ScalaReflection.deserializerFor[T]
-
-    val schema = serializer.dataType
-
-    new ExpressionEncoder[T](
-      schema,
-      false,
-      serializer.flatten,
-      deserializer,
-      ClassTag[T](cls))
   }
 
 }
