@@ -2,6 +2,7 @@ package com.mazeboard.avro
 
 import com.mazeboard.config.ConfigReader
 import com.typesafe.config.ConfigFactory
+import org.apache.avro.Schema
 import org.apache.spark.SparkConf
 import org.apache.spark.sql.catalyst.{ DefinedByConstructorParams, ScalaReflection }
 import org.apache.spark.sql.{ Encoder, SparkSession }
@@ -67,10 +68,11 @@ class AvroSupportSpec extends FlatSpec with Matchers {
                 "fields": [
                     {"name": "name", "type": "string"},
                     {"name": "favorite_number",  "type": ["int", "null"]},
-                    {"name": "favorite_color", "type": ["string", "null"]}
+                    {"name": "favorite_color", "type": ["string", "int", "null"]}
                 ]
                }"""
     val schema: Schema = new Schema.Parser().parse(s)
+    println(schema)
     println("name schema", schema.getField("name").schema())
     val user1: GenericData.Record = new GenericData.Record(schema)
     user1.put("name", "Alyssa")
@@ -189,6 +191,42 @@ class AvroSupportSpec extends FlatSpec with Matchers {
     println("using attrs", userExprEncoder.resolveAndBind(attrs).fromRow(row))
   }
 
+  "avro User from string encoder" must "pass tests" in {
+    import example.avro.User
+    import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder
+    import org.apache.spark.sql.catalyst.dsl.expressions._
+
+    val s = """{"namespace": "example.avro",
+                "type": "record",
+                "name": "User",
+                "fields": [
+                    {"name": "name", "type": "string"},
+                    {"name": "favorite_number",  "type": ["int", "null"]},
+                    {"name": "favorite_color", "type": ["string", "int", "null"]}
+                ]
+               }"""
+    val schema: Schema = new Schema.Parser().parse(s)
+    println("parameters", ScalaReflection.getConstructorParameters(typeOf[User]))
+    val userEncoder = ExpressionEncoder[User]()
+    println(userEncoder.schema)
+    val userExprEncoder = userEncoder.asInstanceOf[ExpressionEncoder[User]]
+    println(userExprEncoder.serializer)
+    println(userExprEncoder.deserializer)
+    val jacek = User.newBuilder()
+      .setName("Ben")
+      .setFavoriteNumber(7)
+      .setFavoriteColor("red")
+      .build()
+    val row = userExprEncoder.toRow(jacek)
+    val jacekReborn = userExprEncoder.resolveAndBind().fromRow(row)
+    println("jacek", jacek)
+    println("jacekReborn", jacekReborn)
+    println(jacek == jacekReborn)
+
+    val attrs = Seq(DslSymbol('name).string, DslSymbol('favorite_number).int, DslSymbol('favorite_color).string)
+    println("using attrs", userExprEncoder.resolveAndBind(attrs).fromRow(row))
+  }
+
   "avro User implicit encoder" must "pass tests" in {
     import example.avro.User
     import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder
@@ -215,10 +253,10 @@ class AvroSupportSpec extends FlatSpec with Matchers {
 
   }
 
-  "avro expression encoder" must "pass tests" in {
+  /*"avro expression encoder" must "pass tests" in {
     import referential.product.v2.Barcode
     implicit val avroEncoder = AvroExpressionEncoder[Barcode]()
-  }
+  }*/
 
   "avro Barcode implicit encoder" must "pass tests" in {
 
@@ -232,7 +270,6 @@ class AvroSupportSpec extends FlatSpec with Matchers {
     val spark = SparkSession.builder.master("local[2]").getOrCreate()
     import spark.implicits._
 
-    org.apache.avro.specific.SpecificFixed
     // enum Currency, new common.lib.v1.Currency() ?
 
     println("getConstructorParameters", ScalaReflection.getConstructorParameters(typeOf[Barcode]))
@@ -293,9 +330,7 @@ class AvroSupportSpec extends FlatSpec with Matchers {
       (x.name, x.favorite_color, x.favorite_number)
     })
 
-    val count = x.count()
-
-    println(s"count: $count head: ${x.collect().toList.head}")
+    println(s"100th: ${x.collect().toList.drop(100).head}")
 
   }
 
@@ -346,4 +381,4 @@ case class Person(id: Long, name: String)
 case class MyStore(stoEan: String, stoAnabelKey: String, weekPattern: MyWeekPattern)
 case class MyWeekPattern(patternId: Int, begDate: String)
 
-case class XUser(name: String, favorite_number: Int, favorite_color: String)
+case class XUser(name: String, favorite_number: Int, favorite_color: Any)

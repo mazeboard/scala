@@ -3,11 +3,9 @@ package com.mazeboard.avro
 import scala.reflect.ClassTag
 import scala.reflect.runtime.universe.{ TypeTag, typeTag }
 import scala.reflect.api._
-import scala.reflect.api.universe._
 import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder
 import org.apache.avro.specific.SpecificRecordBase
 import org.apache.spark.sql.catalyst.{ ScalaReflection, expressions }
-import org.apache.spark.sql.catalyst.ScalaReflection.{ arrayClassFor, deserializerFor, javaKeywords, serializerFor, _ }
 import org.apache.spark.sql.catalyst.analysis.{ GetColumnByOrdinal, UnresolvedAttribute, UnresolvedExtractValue }
 import org.apache.spark.sql.catalyst.expressions.{ BoundReference, CreateNamedStruct, Expression, GetStructField, IsNull, UnsafeArrayData, UpCast }
 import org.apache.spark.sql.catalyst.expressions.objects._
@@ -17,7 +15,7 @@ import org.apache.spark.unsafe.types.UTF8String
 import scala.collection.Map
 
 object AvroExpressionEncoder {
-  def apply[T <: SpecificRecordBase: TypeTag](): ExpressionEncoder[T] = {
+  /*  def apply[T <: SpecificRecordBase: TypeTag](): ExpressionEncoder[T] = {
     // We convert the not-serializable TypeTag into StructType and ClassTag.
     val mirror = ScalaReflection.mirror
     val tpe = typeTag[T].in(mirror).tpe
@@ -78,5 +76,5 @@ object AvroExpressionEncoder {
       AssertNotNull(expr, walkedTypePath)
     }
   }
-
+*/
 }
