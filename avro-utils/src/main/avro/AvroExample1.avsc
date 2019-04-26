@@ -1,0 +1,16 @@
+{"namespace": "org.apache.spark.sql.catalyst.encoders", "type": "record", "name": "AvroExample1",
+         "fields": [
+             {"name":"mymoney","type":["null",{"type":"record","name":"Money","namespace":"org.apache.spark.sql.catalyst.encoders","fields":[
+                {"name":"amount","type":"float","default":0},
+                {"name":"currency","type":{"type":"enum","name":"Currency","symbols":["EUR","USD","BRL"]},"default":"EUR"}]}], "default":null},
+             {"name": "myfloat", "type": "float"},
+             {"name": "mylong", "type": "long"},
+             {"name": "myint", "type": "int"},
+             {"name": "mydouble", "type": "double"},
+             {"name": "myboolean", "type": "boolean"},
+             {"name": "mystring", "type": "string"},
+             {"name": "mybytes", "type": "bytes"},
+             {"name": "myfixed", "type": {"type": "fixed", "name": "Magic", "size": 4}},
+             {"name": "myarray", "type": {"type": "array", "items": "string"}},
+             {"name": "mymap", "type": {"type": "map", "values": "int"}}
+             ] }

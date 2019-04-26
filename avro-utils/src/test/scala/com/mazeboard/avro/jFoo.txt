@@ -1,0 +1,715 @@
+public java.lang.Object generate(Object[] references) {
+return new SpecificUnsafeProjection(references);
+}
+
+class SpecificUnsafeProjection extends org.apache.spark.sql.catalyst.expressions.UnsafeProjection {
+
+private Object[] references;
+private boolean resultIsNull_0;
+private boolean globalIsNull_0;
+private boolean globalIsNull_1;
+private boolean resultIsNull_1;
+private boolean globalIsNull_2;
+private java.lang.String[] mutableStateArray_0 = new java.lang.String[2];
+private org.apache.spark.sql.catalyst.expressions.codegen.UnsafeRowWriter[] mutableStateArray_1 = new org.apache.spark.sql.catalyst.expressions.codegen.UnsafeRowWriter[2];
+
+public SpecificUnsafeProjection(Object[] references) {
+this.references = references;
+
+mutableStateArray_1[0] = new org.apache.spark.sql.catalyst.expressions.codegen.UnsafeRowWriter(3, 64);
+mutableStateArray_1[1] = new org.apache.spark.sql.catalyst.expressions.codegen.UnsafeRowWriter(mutableStateArray_1[0], 1);
+
+}
+
+public void initialize(int partitionIndex) {
+
+}
+
+// Scala.Function1 need this
+public java.lang.Object apply(java.lang.Object row) {
+return apply((InternalRow) row);
+}
+
+public UnsafeRow apply(InternalRow i) {
+mutableStateArray_1[0].reset();
+
+
+mutableStateArray_1[0].zeroOutNullBytes();
+writeFields_0_0(i);
+writeFields_0_1(i);
+return (mutableStateArray_1[0].getRow());
+}
+
+
+private void writeFields_0_1(InternalRow i) {
+
+UTF8String value_27 = StaticInvoke_0(i);
+if (globalIsNull_2) {
+mutableStateArray_1[0].setNullAt(2);
+} else {
+mutableStateArray_1[0].write(2, value_27);
+}
+
+}
+
+
+private void writeFields_0_0(InternalRow i) {
+
+boolean isNull_4 = i.isNullAt(0);
+com.mazeboard.avro.JFoo value_4 = isNull_4 ?
+null : ((com.mazeboard.avro.JFoo)i.get(0, null));
+if (isNull_4) {
+throw new NullPointerException(((java.lang.String) references[0] /* errMsg */));
+}
+boolean isNull_1 = true;
+java.lang.Integer value_1 = null;
+if (!false) {
+
+isNull_1 = false;
+if (!isNull_1) {
+
+Object funcResult_0 = null;
+funcResult_0 = value_4.getA();
+
+if (funcResult_0 != null) {
+value_1 = (java.lang.Integer) funcResult_0;
+} else {
+isNull_1 = true;
+}
+
+
+}
+}
+boolean isNull_0 = true;
+int value_0 = -1;
+if (!isNull_1) {
+
+isNull_0 = false;
+if (!isNull_0) {
+value_0 = value_1.intValue();
+}
+}
+if (isNull_0) {
+mutableStateArray_1[0].setNullAt(0);
+} else {
+mutableStateArray_1[0].write(0, value_0);
+}
+
+InternalRow value_21 = If_0(i);
+if (globalIsNull_1) {
+mutableStateArray_1[0].setNullAt(1);
+} else {
+final InternalRow tmpInput_0 = value_21;
+if (tmpInput_0 instanceof UnsafeRow) {
+mutableStateArray_1[0].write(1, (UnsafeRow) tmpInput_0);
+} else {
+// Remember the current cursor so that we can calculate how many bytes are
+// written later.
+final int previousCursor_0 = mutableStateArray_1[0].cursor();
+
+mutableStateArray_1[1].resetRowWriter();
+
+
+if ((tmpInput_0.isNullAt(0))) {
+mutableStateArray_1[1].setNullAt(0);
+} else {
+mutableStateArray_1[1].write(0, (tmpInput_0.getUTF8String(0)));
+}
+
+
+mutableStateArray_1[0].setOffsetAndSizeFromPreviousCursor(1, previousCursor_0);
+}
+}
+
+}
+
+
+private java.lang.String Invoke_0(InternalRow i) {
+boolean isNull_19 = i.isNullAt(0);
+com.mazeboard.avro.JFoo value_19 = isNull_19 ?
+null : ((com.mazeboard.avro.JFoo)i.get(0, null));
+if (isNull_19) {
+throw new NullPointerException(((java.lang.String) references[2] /* errMsg */));
+}
+boolean isNull_16 = true;
+com.mazeboard.avro.JBar value_16 = null;
+if (!false) {
+
+isNull_16 = false;
+if (!isNull_16) {
+
+Object funcResult_2 = null;
+funcResult_2 = value_19.getB();
+
+if (funcResult_2 != null) {
+value_16 = (com.mazeboard.avro.JBar) funcResult_2;
+} else {
+isNull_16 = true;
+}
+
+
+}
+}
+boolean isNull_14 = true;
+java.lang.String value_14 = null;
+if (!false) {
+
+isNull_14 = false;
+if (!isNull_14) {
+
+Object funcResult_3 = null;
+funcResult_3 = value_16.getBar();
+
+if (funcResult_3 != null) {
+value_14 = (java.lang.String) funcResult_3;
+} else {
+isNull_14 = true;
+}
+
+
+}
+}
+globalIsNull_0 = isNull_14;
+return value_14;
+}
+
+
+private InternalRow If_0(InternalRow i) {
+boolean isNull_10 = i.isNullAt(0);
+com.mazeboard.avro.JFoo value_10 = isNull_10 ?
+null : ((com.mazeboard.avro.JFoo)i.get(0, null));
+if (isNull_10) {
+throw new NullPointerException(((java.lang.String) references[1] /* errMsg */));
+}
+boolean isNull_7 = true;
+com.mazeboard.avro.JBar value_7 = null;
+if (!false) {
+
+isNull_7 = false;
+if (!isNull_7) {
+
+Object funcResult_1 = null;
+funcResult_1 = value_10.getB();
+
+if (funcResult_1 != null) {
+value_7 = (com.mazeboard.avro.JBar) funcResult_1;
+} else {
+isNull_7 = true;
+}
+
+
+}
+}
+boolean isNull_5 = false;
+InternalRow value_5 = null;
+if (!false && isNull_7) {
+
+isNull_5 = true;
+value_5 = ((InternalRow)null);
+} else {
+Object[] values_0 = new Object[1];
+
+resultIsNull_0 = false;
+if (!resultIsNull_0) {
+java.lang.String value_20 = Invoke_0(i);
+resultIsNull_0 = globalIsNull_0;
+mutableStateArray_0[0] = value_20;
+}
+
+boolean isNull_13 = resultIsNull_0;
+UTF8String value_13 = null;
+if (!resultIsNull_0) {
+value_13 = org.apache.spark.unsafe.types.UTF8String.fromString(mutableStateArray_0[0]);
+}
+if (isNull_13) {
+values_0[0] = null;
+} else {
+values_0[0] = value_13;
+}
+
+final InternalRow value_12 = new org.apache.spark.sql.catalyst.expressions.GenericInternalRow(values_0);
+values_0 = null;
+isNull_5 = false;
+value_5 = value_12;
+}
+globalIsNull_1 = isNull_5;
+return value_5;
+}
+
+
+private UTF8String StaticInvoke_0(InternalRow i) {
+resultIsNull_1 = false;
+if (!resultIsNull_1) {
+boolean isNull_24 = i.isNullAt(0);
+com.mazeboard.avro.JFoo value_26 = isNull_24 ?
+null : ((com.mazeboard.avro.JFoo)i.get(0, null));
+if (isNull_24) {
+throw new NullPointerException(((java.lang.String) references[3] /* errMsg */));
+}
+boolean isNull_21 = true;
+java.lang.String value_23 = null;
+if (!false) {
+
+isNull_21 = false;
+if (!isNull_21) {
+
+Object funcResult_4 = null;
+funcResult_4 = value_26.getBar();
+
+if (funcResult_4 != null) {
+value_23 = (java.lang.String) funcResult_4;
+} else {
+isNull_21 = true;
+}
+
+
+}
+}
+resultIsNull_1 = isNull_21;
+mutableStateArray_0[1] = value_23;
+}
+
+boolean isNull_20 = resultIsNull_1;
+UTF8String value_22 = null;
+if (!resultIsNull_1) {
+value_22 = org.apache.spark.unsafe.types.UTF8String.fromString(mutableStateArray_0[1]);
+}
+globalIsNull_2 = isNull_20;
+return value_22;
+}
+
+}
+
+/////////////////////
+public java.lang.Object generate(Object[] references) {
+return new SpecificUnsafeProjection(references);
+}
+
+class SpecificUnsafeProjection extends org.apache.spark.sql.catalyst.expressions.UnsafeProjection {
+
+private Object[] references;
+private boolean resultIsNull_0;
+private boolean globalIsNull_0;
+private boolean globalIsNull_1;
+private boolean resultIsNull_1;
+private boolean globalIsNull_2;
+private java.lang.String[] mutableStateArray_0 = new java.lang.String[2];
+private org.apache.spark.sql.catalyst.expressions.codegen.UnsafeRowWriter[] mutableStateArray_1 = new org.apache.spark.sql.catalyst.expressions.codegen.UnsafeRowWriter[2];
+
+public SpecificUnsafeProjection(Object[] references) {
+this.references = references;
+
+mutableStateArray_1[0] = new org.apache.spark.sql.catalyst.expressions.codegen.UnsafeRowWriter(3, 64);
+mutableStateArray_1[1] = new org.apache.spark.sql.catalyst.expressions.codegen.UnsafeRowWriter(mutableStateArray_1[0], 1);
+
+}
+
+public void initialize(int partitionIndex) {
+
+}
+
+// Scala.Function1 need this
+public java.lang.Object apply(java.lang.Object row) {
+return apply((InternalRow) row);
+}
+
+public UnsafeRow apply(InternalRow i) {
+mutableStateArray_1[0].reset();
+
+
+mutableStateArray_1[0].zeroOutNullBytes();
+writeFields_0_0(i);
+writeFields_0_1(i);
+return (mutableStateArray_1[0].getRow());
+}
+
+
+private void writeFields_0_1(InternalRow i) {
+
+UTF8String value_27 = StaticInvoke_0(i);
+if (globalIsNull_2) {
+mutableStateArray_1[0].setNullAt(2);
+} else {
+mutableStateArray_1[0].write(2, value_27);
+}
+
+}
+
+
+private void writeFields_0_0(InternalRow i) {
+
+InternalRow value_16 = If_0(i);
+if (globalIsNull_1) {
+mutableStateArray_1[0].setNullAt(0);
+} else {
+final InternalRow tmpInput_0 = value_16;
+if (tmpInput_0 instanceof UnsafeRow) {
+mutableStateArray_1[0].write(0, (UnsafeRow) tmpInput_0);
+} else {
+// Remember the current cursor so that we can calculate how many bytes are
+// written later.
+final int previousCursor_0 = mutableStateArray_1[0].cursor();
+
+mutableStateArray_1[1].resetRowWriter();
+
+
+if ((tmpInput_0.isNullAt(0))) {
+mutableStateArray_1[1].setNullAt(0);
+} else {
+mutableStateArray_1[1].write(0, (tmpInput_0.getUTF8String(0)));
+}
+
+
+mutableStateArray_1[0].setOffsetAndSizeFromPreviousCursor(0, previousCursor_0);
+}
+}
+
+boolean isNull_19 = i.isNullAt(0);
+com.mazeboard.avro.Foo value_21 = isNull_19 ?
+null : ((com.mazeboard.avro.Foo)i.get(0, null));
+if (isNull_19) {
+throw new NullPointerException(((java.lang.String) references[2] /* errMsg */));
+}
+boolean isNull_16 = true;
+java.lang.Integer value_18 = null;
+if (!false) {
+
+isNull_16 = false;
+if (!isNull_16) {
+
+Object funcResult_3 = null;
+funcResult_3 = value_21.getA();
+
+if (funcResult_3 != null) {
+value_18 = (java.lang.Integer) funcResult_3;
+} else {
+isNull_16 = true;
+}
+
+
+}
+}
+boolean isNull_15 = true;
+int value_17 = -1;
+if (!isNull_16) {
+
+isNull_15 = false;
+if (!isNull_15) {
+value_17 = value_18.intValue();
+}
+}
+if (isNull_15) {
+mutableStateArray_1[0].setNullAt(1);
+} else {
+mutableStateArray_1[0].write(1, value_17);
+}
+
+}
+
+
+private java.lang.String Invoke_0(InternalRow i) {
+boolean isNull_14 = i.isNullAt(0);
+com.mazeboard.avro.Foo value_14 = isNull_14 ?
+null : ((com.mazeboard.avro.Foo)i.get(0, null));
+if (isNull_14) {
+throw new NullPointerException(((java.lang.String) references[1] /* errMsg */));
+}
+boolean isNull_11 = true;
+com.mazeboard.avro.Bar value_11 = null;
+if (!false) {
+
+isNull_11 = false;
+if (!isNull_11) {
+
+Object funcResult_1 = null;
+funcResult_1 = value_14.getB();
+
+if (funcResult_1 != null) {
+value_11 = (com.mazeboard.avro.Bar) funcResult_1;
+} else {
+isNull_11 = true;
+}
+
+
+}
+}
+boolean isNull_9 = true;
+java.lang.String value_9 = null;
+if (!false) {
+
+isNull_9 = false;
+if (!isNull_9) {
+
+Object funcResult_2 = null;
+funcResult_2 = value_11.getBar();
+
+if (funcResult_2 != null) {
+value_9 = (java.lang.String) funcResult_2;
+} else {
+isNull_9 = true;
+}
+
+
+}
+}
+globalIsNull_0 = isNull_9;
+return value_9;
+}
+
+
+private InternalRow If_0(InternalRow i) {
+boolean isNull_5 = i.isNullAt(0);
+com.mazeboard.avro.Foo value_5 = isNull_5 ?
+null : ((com.mazeboard.avro.Foo)i.get(0, null));
+if (isNull_5) {
+throw new NullPointerException(((java.lang.String) references[0] /* errMsg */));
+}
+boolean isNull_2 = true;
+com.mazeboard.avro.Bar value_2 = null;
+if (!false) {
+
+isNull_2 = false;
+if (!isNull_2) {
+
+Object funcResult_0 = null;
+funcResult_0 = value_5.getB();
+
+if (funcResult_0 != null) {
+value_2 = (com.mazeboard.avro.Bar) funcResult_0;
+} else {
+isNull_2 = true;
+}
+
+
+}
+}
+boolean isNull_0 = false;
+InternalRow value_0 = null;
+if (!false && isNull_2) {
+
+isNull_0 = true;
+value_0 = ((InternalRow)null);
+} else {
+Object[] values_0 = new Object[1];
+
+resultIsNull_0 = false;
+if (!resultIsNull_0) {
+java.lang.String value_15 = Invoke_0(i);
+resultIsNull_0 = globalIsNull_0;
+mutableStateArray_0[0] = value_15;
+}
+
+boolean isNull_8 = resultIsNull_0;
+UTF8String value_8 = null;
+if (!resultIsNull_0) {
+value_8 = org.apache.spark.unsafe.types.UTF8String.fromString(mutableStateArray_0[0]);
+}
+if (isNull_8) {
+values_0[0] = null;
+} else {
+values_0[0] = value_8;
+}
+
+final InternalRow value_7 = new org.apache.spark.sql.catalyst.expressions.GenericInternalRow(values_0);
+values_0 = null;
+isNull_0 = false;
+value_0 = value_7;
+}
+globalIsNull_1 = isNull_0;
+return value_0;
+}
+
+
+private UTF8String StaticInvoke_0(InternalRow i) {
+resultIsNull_1 = false;
+if (!resultIsNull_1) {
+boolean isNull_24 = i.isNullAt(0);
+com.mazeboard.avro.Foo value_26 = isNull_24 ?
+null : ((com.mazeboard.avro.Foo)i.get(0, null));
+if (isNull_24) {
+throw new NullPointerException(((java.lang.String) references[3] /* errMsg */));
+}
+boolean isNull_21 = true;
+java.lang.String value_23 = null;
+if (!false) {
+
+isNull_21 = false;
+if (!isNull_21) {
+
+Object funcResult_4 = null;
+funcResult_4 = value_26.getBar();
+
+if (funcResult_4 != null) {
+value_23 = (java.lang.String) funcResult_4;
+} else {
+isNull_21 = true;
+}
+
+
+}
+}
+resultIsNull_1 = isNull_21;
+mutableStateArray_0[1] = value_23;
+}
+
+boolean isNull_20 = resultIsNull_1;
+UTF8String value_22 = null;
+if (!resultIsNull_1) {
+value_22 = org.apache.spark.unsafe.types.UTF8String.fromString(mutableStateArray_0[1]);
+}
+globalIsNull_2 = isNull_20;
+return value_22;
+}
+
+}
+
+public java.lang.Object generate(Object[] references) {
+return new SpecificSafeProjection(references);
+}
+
+class SpecificSafeProjection extends org.apache.spark.sql.catalyst.expressions.codegen.BaseProjection {
+
+private Object[] references;
+private InternalRow mutableRow;
+private boolean globalIsNull_0;
+private boolean resultIsNull_0;
+private int argValue_0;
+
+public SpecificSafeProjection(Object[] references) {
+this.references = references;
+mutableRow = (InternalRow) references[references.length - 1];
+
+
+}
+
+public void initialize(int partitionIndex) {
+
+}
+
+public java.lang.Object apply(java.lang.Object _i) {
+InternalRow i = (InternalRow) _i;
+com.mazeboard.avro.Foo value_16 = InitializeJavaBean_0(i);
+if (false) {
+mutableRow.setNullAt(0);
+} else {
+
+mutableRow.update(0, value_16);
+}
+
+return mutableRow;
+}
+
+
+private com.mazeboard.avro.Foo InitializeJavaBean_0(InternalRow i) {
+final com.mazeboard.avro.Foo value_1 = false ?
+null : new com.mazeboard.avro.Foo();
+com.mazeboard.avro.Foo javaBean_0 = value_1;
+if (!false) {
+
+com.mazeboard.avro.Bar value_11 = If_0(i);
+if (!globalIsNull_0) {
+javaBean_0.setB(value_11);
+}
+
+resultIsNull_0 = false;
+if (!resultIsNull_0) {
+boolean isNull_12 = i.isNullAt(1);
+int value_13 = isNull_12 ?
+-1 : (i.getInt(1));
+resultIsNull_0 = isNull_12;
+argValue_0 = value_13;
+}
+
+boolean isNull_11 = resultIsNull_0;
+java.lang.Integer value_12 = null;
+if (!resultIsNull_0) {
+value_12 = java.lang.Integer.valueOf(argValue_0);
+}
+if (!isNull_11) {
+javaBean_0.setA(value_12);
+}
+
+boolean isNull_14 = i.isNullAt(2);
+UTF8String value_15 = isNull_14 ?
+null : (i.getUTF8String(2));
+boolean isNull_13 = true;
+java.lang.String value_14 = null;
+if (!isNull_14) {
+
+isNull_13 = false;
+if (!isNull_13) {
+
+Object funcResult_1 = null;
+funcResult_1 = value_15.toString();
+value_14 = (java.lang.String) funcResult_1;
+
+}
+}
+if (!isNull_13) {
+javaBean_0.setBar(value_14);
+}
+
+}
+
+return value_1;
+}
+
+
+private com.mazeboard.avro.Bar If_0(InternalRow i) {
+boolean isNull_4 = i.isNullAt(0);
+InternalRow value_4 = isNull_4 ?
+null : (i.getStruct(0, 1));
+boolean isNull_2 = false;
+com.mazeboard.avro.Bar value_2 = null;
+if (!false && isNull_4) {
+
+isNull_2 = true;
+value_2 = ((com.mazeboard.avro.Bar)null);
+} else {
+final com.mazeboard.avro.Bar value_7 = false ?
+null : new com.mazeboard.avro.Bar();
+com.mazeboard.avro.Bar javaBean_1 = value_7;
+if (!false) {
+
+boolean isNull_10 = i.isNullAt(0);
+InternalRow value_10 = isNull_10 ?
+null : (i.getStruct(0, 1));
+boolean isNull_9 = isNull_10;
+UTF8String value_9 = null;
+
+if (!isNull_10) {
+
+if (value_10.isNullAt(0)) {
+isNull_9 = true;
+} else {
+value_9 = value_10.getUTF8String(0);
+}
+
+}
+boolean isNull_8 = true;
+java.lang.String value_8 = null;
+if (!isNull_9) {
+
+isNull_8 = false;
+if (!isNull_8) {
+
+Object funcResult_0 = null;
+funcResult_0 = value_9.toString();
+value_8 = (java.lang.String) funcResult_0;
+
+}
+}
+if (!isNull_8) {
+javaBean_1.setBar(value_8);
+}
+
+}
+isNull_2 = false;
+value_2 = value_7;
+}
+globalIsNull_0 = isNull_2;
+return value_2;
+}
+
+}
+

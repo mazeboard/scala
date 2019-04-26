@@ -4,22 +4,18 @@ import com.mazeboard.config.ConfigReader
 import com.typesafe.config.ConfigFactory
 import org.apache.avro.Schema
 import org.apache.spark.SparkConf
-import org.apache.spark.sql.catalyst.{ DefinedByConstructorParams, ScalaReflection }
-import org.apache.spark.sql.{ Encoder, SparkSession }
-import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder
+import org.apache.spark.rdd.RDD
+import org.apache.spark.sql.catalyst.{ DefinedByConstructorParams, InternalRow, ScalaReflection, expressions }
+import org.apache.spark.sql._
+import org.apache.spark.sql.catalyst.encoders._
 import org.apache.spark.sql.catalyst.expressions.{ BoundReference, CreateNamedStruct, Expression }
-import org.apache.spark.sql.catalyst.expressions.objects.AssertNotNull
+import org.apache.spark.sql.catalyst.expressions.objects.{ AssertNotNull, StaticInvoke }
 import org.scalatest.{ FlatSpec, Matchers }
-import org.apache.avro.specific.SpecificRecordBase
-import org.apache.spark.network.protocol.Encoders
 
 import scala.language.dynamics
-import scala.reflect.ClassTag
-import scala.reflect.api
 import scala.reflect.runtime.universe._
-import scala.reflect.runtime.currentMirror
 import org.apache.spark.sql.types._
-import referential.product.v2.{ CrpAddDesc, CrpAttributes }
+import org.apache.spark.sql.avro
 
 class AvroSupportSpec extends FlatSpec with Matchers {
 
@@ -127,6 +123,20 @@ class AvroSupportSpec extends FlatSpec with Matchers {
     val tt = compiler.javaUnbox(schema.getField("crpAttributes").schema())
     println(tt)
   }*/
+
+  "Foo bean encoder" must "pass tests" in {
+    val fooEnc = Encoders.bean[Foo](classOf[Foo]).asInstanceOf[ExpressionEncoder[Foo]]
+    val bar = new Bar
+    bar.setBar("ok")
+    val a = new Foo
+    a.setA(55)
+    a.setB(bar)
+    a.setBar("BAR")
+    val row = fooEnc.toRow(a)
+    val m = fooEnc.resolveAndBind().fromRow(row)
+    println(m)
+    println(fooEnc.schema)
+  }
 
   "avro User reader/writer" must "pass tests" in {
     import org.apache.avro.generic.GenericRecord
@@ -258,9 +268,108 @@ class AvroSupportSpec extends FlatSpec with Matchers {
     implicit val avroEncoder = AvroExpressionEncoder[Barcode]()
   }*/
 
+  "Currency encoder" must "pass tests" in {
+    import common.lib.v1.Currency
+    import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder
+    import org.apache.spark.sql.Dataset
+
+    val spark = SparkSession.builder.master("local[2]").getOrCreate()
+    import spark.implicits._
+    implicit val currEncoder = ExpressionEncoder[Currency]()
+    val ds: Dataset[Currency] = List(Currency.EUR, Currency.USD).toDS()
+
+    println(ds.collect().toList)
+  }
+
+  "Avro with array and map types encoder" must "pass tests" in {
+    import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder
+    import org.apache.spark.sql.Dataset
+    import org.apache.spark.sql.catalyst.encoders.AvroExample1
+    import org.apache.spark.sql.catalyst.encoders.Magic
+    import org.apache.spark.sql.catalyst.encoders.Money
+    import org.apache.spark.sql.catalyst.encoders.Currency
+
+    val spark = SparkSession.builder.master("local[2]").getOrCreate()
+    import spark.implicits._
+    //implicit val avroExampleEncoder = ExpressionEncoder[AvroExample1]()
+    implicit val avroExampleEncoder = Encoders.bean[AvroExample1](classOf[AvroExample1]).asInstanceOf[ExpressionEncoder[AvroExample1]]
+    val input: AvroExample1 = AvroExample1.newBuilder()
+      .setMyarray(List("Foo", "Bar").asJava)
+      .setMyboolean(true)
+      .setMybytes(java.nio.ByteBuffer.wrap("MyBytes".getBytes()))
+      .setMydouble(2.5)
+      .setMyfixed(new Magic("magic".getBytes))
+      .setMyfloat(25.0F)
+      .setMyint(100)
+      .setMylong(10L)
+      .setMystring("hello")
+      .setMymap(Map(
+        "foo" -> new java.lang.Integer(1),
+        "bar" -> new java.lang.Integer(2)).asJava)
+      .setMymoney(Money.newBuilder().setAmount(100.0F).setCurrency(Currency.EUR).build())
+      .build()
+
+    val x: AvroExample1 = AvroExample1.newBuilder()
+      .setMyarray(List("Foo", "Bar").asJava)
+      .setMyboolean(true)
+      .setMybytes(java.nio.ByteBuffer.wrap("MyBytes".getBytes()))
+      .setMydouble(2.5)
+      .setMyfixed(new Magic("magic".getBytes))
+      .setMyfloat(25.0F)
+      .setMyint(100)
+      .setMylong(10L)
+      .setMystring("hello")
+      .setMymap(Map(
+        "foo" -> new java.lang.Integer(1),
+        "bar" -> new java.lang.Integer(2)).asJava)
+      .setMymoney(Money.newBuilder().setAmount(100.0F).setCurrency(Currency.EUR).build())
+      .build()
+
+    println("compare", input.asInstanceOf[Comparable[Any]].equals(x))
+    println("compare", x.asInstanceOf[Comparable[Any]].equals(input))
+    println("compare", x == input)
+
+    val row: InternalRow = avroExampleEncoder.toRow(input)
+
+    row.equals(row)
+
+    val output: AvroExample1 = avroExampleEncoder.resolveAndBind().fromRow(row)
+
+    val ds: Dataset[AvroExample1] = List(input).toDS()
+
+    println(ds.schema)
+    println(ds.collect().toList)
+
+    ds.write.format("avro").save("example1")
+
+    val fooDF = spark.read.format("avro").load("example1")
+
+    val fooDS = fooDF.as[AvroExample1]
+
+    println(fooDS.collect().toList)
+  }
+
+  "java.nio.ByteBuffer encoder" must "pass tests" in {
+    import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder
+    import org.apache.spark.sql.Dataset
+
+    val spark = SparkSession.builder.master("local[2]").getOrCreate()
+    import spark.implicits._
+    implicit val zooEncoder = Encoders.bean[Zoo](classOf[Zoo]).asInstanceOf[ExpressionEncoder[Zoo]]
+    val zoo = new Zoo()
+    zoo.setZoo(java.nio.ByteBuffer.wrap("MyBytes".getBytes()))
+
+    val ds: Dataset[Zoo] = List(zoo).toDS()
+    println(ds.schema)
+    println(ds.map(_.getZoo().array().toList).collect().toList)
+
+  }
+
   "avro Barcode implicit encoder" must "pass tests" in {
 
     import referential.product.v2.Barcode
+    import referential.product.v2.CrpAttributes
+    import referential.product.v2.CrpAddDesc
     import common.lib.v1.Money
     import common.lib.v1.Currency
     import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder
@@ -269,53 +378,61 @@ class AvroSupportSpec extends FlatSpec with Matchers {
 
     val spark = SparkSession.builder.master("local[2]").getOrCreate()
     import spark.implicits._
+    implicit val barcodeEncoder = Encoders.bean[Barcode](classOf[Barcode]).asInstanceOf[ExpressionEncoder[Barcode]]
+    implicit val tuplEncoder = Encoders.tuple[String, Money, CrpAddDesc](
+      Encoders.STRING,
+      Encoders.bean[Money](classOf[Money]).asInstanceOf[ExpressionEncoder[Money]],
+      Encoders.bean[CrpAddDesc](classOf[CrpAddDesc]).asInstanceOf[ExpressionEncoder[CrpAddDesc]])
 
-    // enum Currency, new common.lib.v1.Currency() ?
-
-    println("getConstructorParameters", ScalaReflection.getConstructorParameters(typeOf[Barcode]))
-    //implicit val currencyEncoder = Encoders.kryo[Currency] // does not work for enum ? (No Encoder found for common.lib.v1.Currency)
-    //implicit val barcodeEncoder = Encoders.kryo[Barcode]
-    implicit val barcodeEncoder = ExpressionEncoder[Barcode]()
-
-    val ds: Dataset[Barcode] = 0.until(10000).map(i => {
+    val barcode = {
       val crpAddDesc = new java.util.ArrayList[CrpAddDesc]()
       crpAddDesc.add(CrpAddDesc.newBuilder()
-        .setCrpAddEngDesc(s"Crp description1 $i")
+        .setCrpAddEngDesc(s"Crp description 1")
         .build())
       crpAddDesc.add(CrpAddDesc.newBuilder()
-        .setCrpAddEngDesc(s"Crp description2 $i")
+        .setCrpAddEngDesc(s"Crp description 2")
         .build())
       val crpAttrs = new java.util.ArrayList[CrpAttributes]()
       crpAttrs.add(CrpAttributes.newBuilder()
-        .setCrpCode(s"crp attr1 $i")
+        .setCrpCode(s"crp attr 1")
         .setCrpAddDesc(crpAddDesc)
         .build())
       crpAttrs.add(CrpAttributes.newBuilder()
-        .setCrpCode(s"crp attr2 $i")
+        .setCrpCode(s"crp attr 2")
         .build())
-      val barcode = Barcode.newBuilder()
-        .setBarcode(s"Bar$i")
+      Barcode.newBuilder()
+        .setBarcode(s"Bar")
         .setPrdTaxVal(Money.newBuilder()
-          .setUnscaledAmount(i.toLong)
+          .setUnscaledAmount(1L)
           .setScale(0)
           .setCurrency(Currency.EUR)
           .setCurrencyAlphaCode("EUR")
           .build())
         .setCrpAttributes(crpAttrs)
         .build()
-      barcode
-    })
-      .toDS()
+    }
+    val ds: Dataset[Barcode] = List(barcode).toDS()
 
-    val x = ds.map(a => {
+    //val y: Dataset[Money] = ds.map(a => a.getPrdTaxVal)
+    val x: Dataset[(String, Money, CrpAddDesc)] = ds.map(a => {
       (
-        a.barcode(),
-        a.prdTaxVal(),
-        a.crpAttributes())
+        a.getBarcode,
+        a.getPrdTaxVal,
+        a.getCrpAttributes.get(0).getCrpAddDesc.get(0))
     })
 
-    println(x.collect().toList.drop(100).head)
+    println(x.collect().toList.head)
 
+  }
+
+  "Money" must "pass tests" in {
+    import common.lib.v1.Money
+    import common.lib.v1.Currency
+    val spark = SparkSession.builder.master("local[2]").getOrCreate()
+    import spark.implicits._
+    implicit val moneyEncode = ExpressionEncoder[Money]
+    val ds = List(Money.newBuilder().setUnscaledAmount(1L).setScale(0).setCurrency(Currency.EUR).setCurrencyAlphaCode("EUR").build()).toDS()
+    println(ds.map(m => (m.getUnscaledAmount(), m.getScale(), m.getCurrency())).collect().toList)
   }
 
   "case class XUser encoder" must "pass tests" in {
@@ -325,12 +442,65 @@ class AvroSupportSpec extends FlatSpec with Matchers {
     import spark.implicits._
 
     val ds: Dataset[XUser] = 0.until(10000).map(i => XUser("Foo", i, "green")).toDS()
-
     val x = ds.map(x => {
       (x.name, x.favorite_color, x.favorite_number)
     })
 
     println(s"100th: ${x.collect().toList.drop(100).head}")
+
+  }
+
+  "bean" must "pas tests" in {
+    val spark = SparkSession.builder.master("local[2]").getOrCreate()
+    import spark.implicits._
+
+    implicit val encoderFoo = Encoders.bean[Foo](classOf[Foo])
+    implicit val encoderBar: Encoder[Bar] = Encoders.bean[Bar](classOf[Bar])
+    implicit val tupleEncoder: Encoder[(Foo, Bar)] = Encoders.tuple(encoderFoo, encoderBar)
+    val bar = new Bar
+    bar.setBar("ok")
+    val a = new Foo
+    a.setA(55)
+    a.setB(bar)
+    a.setBar("BAR")
+    val ds = List(a).toDS()
+    val x = ds.map(x => (x, x.b))
+    val d: DataFrame = List(a).toDF().select("a", "b")
+    println(d.collect().toList)
+    println(x.collect().toList)
+
+    val df = List(a).toDF()
+    val r = df.collect().foreach(println)
+    println(df.schema)
+  }
+
+  "java bean" must "pas tests" in {
+    val spark = SparkSession.builder.master("local[2]").getOrCreate()
+    import spark.implicits._
+
+    implicit val encoderZoo = ExpressionEncoder[JFoo] //Encoders.bean(classOf[Zoo])
+    val bar = new JBar
+    bar.setBar("ok")
+    val a = new JFoo
+    a.setA(55)
+    a.setB(bar)
+    a.setBar("BAR")
+    val ds = List(a).toDS()
+    println(ds.collect().toList)
+
+    val df = List(a).toDF()
+    val r = df.collect().foreach(println)
+    println(df.schema)
+  }
+
+  "java enum" must "pass tests" in {
+    println(typeOf[Days])
+    println(ScalaReflection.getConstructorParameters(typeOf[Days]))
+    println(classOf[Days].getSuperclass.getName)
+    //val dsDays: Dataset[Days] = List(Days.Fri).toDS()
+    //println(s"Days: ${dsDays.collect().toList.head}")
+
+    println(Days.valueOf("Fri").name())
 
   }
 
@@ -350,7 +520,6 @@ class AvroSupportSpec extends FlatSpec with Matchers {
     println(avroEncoder.schema)
     println(avroEncoder.clsTag)
     val storeExprEncoder = avroEncoder.asInstanceOf[ExpressionEncoder[Store]]
-    println(storeExprEncoder.flat)
     println(storeExprEncoder.serializer)
     println(storeExprEncoder.deserializer)
     println(storeExprEncoder.namedExpressions)
@@ -381,4 +550,39 @@ case class Person(id: Long, name: String)
 case class MyStore(stoEan: String, stoAnabelKey: String, weekPattern: MyWeekPattern)
 case class MyWeekPattern(patternId: Int, begDate: String)
 
-case class XUser(name: String, favorite_number: Int, favorite_color: Any)
+case class XUser(name: String, favorite_number: Int, favorite_color: String)
+
+class Zoo {
+  private var zoo: java.nio.ByteBuffer = _
+  def setZoo(value: java.nio.ByteBuffer): Unit = {
+    zoo = value
+  }
+  def getZoo() = zoo
+}
+class Bar {
+  private var bar$: java.lang.String = _
+  def setBar(value: java.lang.String): Unit = {
+    bar$ = value
+  }
+  def getBar(): java.lang.String = bar$
+  override def toString() = { s"Bar(${bar$})" }
+}
+
+class Foo extends Bar {
+  var a: java.lang.Integer = _
+  var b: Bar = _
+
+  def getA() = a
+
+  def setA(x: java.lang.Integer) {
+    a = x
+  }
+  def getB(): Bar = b
+
+  def setB(x: Bar) {
+    x.setBar("done")
+    b = x
+  }
+  override def toString() = { s"Foo($a,$b, ${getBar()})" }
+}
+

@@ -116,8 +116,9 @@ lazy val avroUtils = (project in file("avro-utils"))
     javacOptions ++= Seq("-parameters"),
     libraryDependencies += "org.scala-lang" % "scala-reflect" % scalaVersion.value,
     //libraryDependencies += "org.apache.avro" % "avro-tools" % "1.8.2",
-    libraryDependencies += "org.apache.spark" %% "spark-sql" % "2.4.0",
-    libraryDependencies += "com.databricks" % "spark-avro_2.11" % "4.0.0",
+    libraryDependencies += "org.apache.spark" %% "spark-sql" % "3.0.0-SNAPSHOT",
+    libraryDependencies += "org.apache.spark" %% "spark-avro" % "3.0.0-SNAPSHOT",
+    //libraryDependencies += "com.databricks" % "spark-avro_2.11" % "4.0.0",
     libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % Test,
     avroSettings
   )

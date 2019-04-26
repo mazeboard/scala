@@ -1,0 +1,77 @@
+##
+## Licensed to the Apache Software Foundation (ASF) under one
+## or more contributor license agreements.  See the NOTICE file
+## distributed with this work for additional information
+## regarding copyright ownership.  The ASF licenses this file
+## to you under the Apache License, Version 2.0 (the
+## "License"); you may not use this file except in compliance
+## with the License.  You may obtain a copy of the License at
+##
+##     http://www.apache.org/licenses/LICENSE-2.0
+##
+## Unless required by applicable law or agreed to in writing, software
+## distributed under the License is distributed on an "AS IS" BASIS,
+## WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+## See the License for the specific language governing permissions and
+## limitations under the License.
+##
+#if ($schema.getNamespace())
+package $schema.getNamespace();
+#end
+import org.apache.spark.sql.catalyst.DefinedByConstructorParams;
+@SuppressWarnings("all")
+#if ($schema.getDoc())
+/** $schema.getDoc() */
+#end
+#foreach ($annotation in $this.javaAnnotations($schema))
+@$annotation
+#end
+@org.apache.avro.specific.AvroGenerated
+public class ${this.mangle($schema.getName())} implements Comparable<${this.mangle($schema.getName())}>, java.io.Serializable, DefinedByConstructorParams {
+#set($size = ${schema.getEnumSymbols().size()} - 1)
+#define($symbols)#foreach ($symbol in ${schema.getEnumSymbols()})$symbol#if(${schema.getEnumOrdinal("$symbol")} < $size),#end#end#end
+#define($enum)  public static ${this.mangle($schema.getName())} ${this.mangle($symbol)} = new ${this.mangle($schema.getName())}("${this.mangle($symbol)}", ${schema.getEnumOrdinal("$symbol")});
+#end
+#foreach ($symbol in ${schema.getEnumSymbols()})$enum#end
+    public static ${this.mangle($schema.getName())} valueOf(java.lang.String name) {
+        if (name == null ) throw (new java.lang.NullPointerException());
+        switch(name) {
+#foreach ($symbol in ${schema.getEnumSymbols()})
+            case "$symbol": return $symbol;
+#end
+            default: throw(new java.lang.IllegalArgumentException());
+        }
+    }
+    public static ${this.mangle($schema.getName())} valueOf(${this.mangle($schema.getName())} c, java.lang.String name) {
+        if (c == null || name == null ) throw (new java.lang.NullPointerException());
+        switch(name) {
+#foreach ($symbol in ${schema.getEnumSymbols()})
+            case "$symbol": return $symbol;
+#end
+            default: throw(new java.lang.IllegalArgumentException());
+        }
+    }
+
+    public String name;
+    public int ordinal;
+    public java.util.List<${this.mangle($schema.getName())}> values = java.util.Arrays.asList($symbols);
+
+    public java.util.List<${this.mangle($schema.getName())}> values() {
+        return this.values;
+    }
+
+    public int compareTo(${this.mangle($schema.getName())} other) {
+        return this.ordinal == other.ordinal ? 0 : (this.ordinal < other.ordinal) ? -1 : 1;
+    }
+
+    public ${this.mangle($schema.getName())}(String name, int ordinal) {
+        this.name = name;
+        this.ordinal = ordinal;
+    }
+
+    public String name() { return this.name; }
+    public int ordinal() { return this.ordinal; }
+
+  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("${this.javaEscape($schema.toString())}");
+  public static org.apache.avro.Schema getClassSchema() { return SCHEMA$; }
+}
