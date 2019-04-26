@@ -28,7 +28,8 @@ class ConfigReader(config: Config) extends ObjectReader[Config](config.atKey(ID)
       obj.getConfig(ID).getValue(name).atKey(ID)
     } catch {
       case e: ConfigException.Missing => throw new Missing(e)
-      case e: ConfigException.WrongType => throw new InvalidObject(e)
+      case e: ConfigException.WrongType =>
+        throw new InvalidObject(e)
       case e: Throwable => throw e
     }
   }

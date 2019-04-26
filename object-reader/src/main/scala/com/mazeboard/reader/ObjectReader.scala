@@ -105,68 +105,65 @@ abstract class ObjectReader[X](root: X) extends Dynamic {
           case t if t =:= typeOf[String] => unwrap(obj).toString
           case _ => load[T]
         }
-      case e: Throwable =>
-        throw e
     })
       .asInstanceOf[T]
   }
 
   // Note: a class has a companion when:
   // 1. there is an object with the same name in the same file,
-  // 2. if a constructor has parameters with default values (the functions that return the default value is defined
+  // 2. if a constructor has parameters with default values (the functions that return the default values are defined
   //  in the companion object)
 
   private def load[A](implicit ttag: TypeTag[A], obj: X): A = {
     val tpe = ttag.tpe
-    (getConstructors(tpe)
-      .sortWith((m1, m2) =>
-        m1.isPrimaryConstructor
-          || (!m2.isPrimaryConstructor &&
-            (m1.isConstructor
-              || (m1.paramLists.head.length > m2.paramLists.head.length))))
-      .map(m => (m, null.asInstanceOf[List[(AnyRef, Boolean)]]))
-      .fold(null)((a, b) => {
-        if (a != null)
-          a
-        else {
-          (b match {
-            case (m, _) =>
-              (m, {
-                m.paramLists.head.zipWithIndex.map {
-                  case (param, index) =>
-                    try {
-                      val xobj = getValue(param.name.toString, obj)
-                      (dispatch()(getTypeTag(param.typeSignature), xobj).asInstanceOf[AnyRef], false)
-                    } catch {
-                      case e: Missing =>
-                        if (param.asTerm.isParamWithDefault) {
-                          val d = tpe.companion.decl(TermName(s"${m.name.encodedName}$$default$$${index + 1}")).asMethod
-                          (instanceMirror(tpe).reflectMethod(d)().asInstanceOf[AnyRef], true)
-                        } else if (param.typeSignature <:< typeOf[Option[_]]) {
-                          (None, false)
-                        } else (null, false)
-                      case e: InvalidObject =>
-                        (null, false)
-                      case e: Throwable =>
-                        (null, false)
-                    }
-                }
-              })
-          }) match {
-            case (m, list) if list.forall(_._1 != null) && !list.forall(_._2) => (m, list)
-            case _ => a
+    val x = try {
+      getConstructors(tpe)
+        .map(m => (m, null.asInstanceOf[List[(AnyRef, Boolean)]]))
+        .fold(null)((a, b) => {
+          if (a != null)
+            a
+          else {
+            (b match {
+              case (m, _) =>
+                (m, {
+                  m.paramLists.head.zipWithIndex.map {
+                    case (param, index) =>
+                      try {
+                        val xobj = getValue(param.name.toString, obj)
+                        (dispatch()(getTypeTag(param.typeSignature), xobj).asInstanceOf[AnyRef], false)
+                      } catch {
+                        case e: Missing =>
+                          if (param.asTerm.isParamWithDefault) {
+                            val d = tpe.companion.decl(TermName(s"${m.name.encodedName}$$default$$${index + 1}")).asMethod
+                            (instanceMirror(tpe).reflectMethod(d)().asInstanceOf[AnyRef], true)
+                          } else if (param.typeSignature <:< typeOf[Option[_]]) {
+                            (None, false)
+                          } else (null, false)
+                        case e: InvalidObject => throw e
+                        case e: Throwable => (null, false)
+                      }
+                  }
+                })
+            }) match {
+              case (m, list) if list.forall(_._1 != null) && !list.forall(_._2) => (m, list)
+              case _ => a
+            }
           }
-        }
-      }) match {
-        case e if e == null =>
-          // create an instance with obj as parameter (if tpe has a constructor or an apply method that accepts one parameter)
-          createInstance(tpe, (method: MethodSymbol) => {
-            implicit val ttag: TypeTag[_] = getTypeTag(method.paramLists.head.head.typeSignature.asSeenFrom(tpe, tpe.typeSymbol))
-            dispatch().asInstanceOf[AnyRef]
-          })
-        case (method, args) =>
-          invoke(tpe, method, args.map(_._1): _*)
-      })
+        })
+    } catch {
+      case e: InvalidObject => null
+    }
+
+    (x match {
+      case e if e == null =>
+        // create an instance with obj as parameter (if tpe has a constructor or a static method that accepts one parameter)
+        createInstance(tpe, (method: MethodSymbol) => {
+          implicit val ttag: TypeTag[_] = getTypeTag(method.paramLists.head.head.typeSignature.asSeenFrom(tpe, tpe.typeSymbol))
+          dispatch().asInstanceOf[AnyRef]
+        })
+      case (method, args) =>
+        invoke(tpe, method, args.map(_._1): _*)
+    })
       .asInstanceOf[A]
   }
 
@@ -182,8 +179,8 @@ abstract class ObjectReader[X](root: X) extends Dynamic {
             val classz: Class[_] = currentMirror.runtimeClass(tpe.typeSymbol.asClass)
             classz.getMethod(
               method.name.decodedName.toString,
-              method.paramLists.flatMap(x => x)
-                .map(x => currentMirror.runtimeClass(x.typeSignature.typeSymbol.asClass)): _*)
+              method.paramLists
+                .flatten.map(x => currentMirror.runtimeClass(x.typeSignature.typeSymbol.asClass)): _*)
               .invoke(null, args: _*)
         }
     }
@@ -205,19 +202,33 @@ abstract class ObjectReader[X](root: X) extends Dynamic {
 
   }
 
-  private def createInstance(tpe: Type, arg: (MethodSymbol) => AnyRef) = {
-    val method = getConstructors(tpe)
+  private def createInstance(tpe: Type, arg: (MethodSymbol) => AnyRef): Any = {
+    var r: Any = null
+    getConstructors(tpe)
       .filter(_.paramLists.head.length == 1)
-      .head
-    invoke(tpe, method, arg(method))
+      .foreach(method =>
+        try {
+          val x = invoke(tpe, method, arg(method))
+          r = x
+        } catch {
+          case e: Throwable =>
+        })
+    if (r == null) throw new Exception() else r
   }
 
   private def getConstructors(tpe: Type): List[MethodSymbol] = {
     val methods = if (tpe.typeSymbol.isClass && !tpe.typeSymbol.isAbstract)
-      tpe.decls.filter(_.isConstructor).map(_.asMethod).toList
+      tpe.decls.filter(m => m.isConstructor &&
+        m.asMethod.paramLists.length > 0 &&
+        m.asMethod.paramLists.head.length > 0)
+        .map(_.asMethod).toList
     else
       List()
-    val companionMethods = tpe.companion.decls.filter(m => m.isMethod && m.isStatic && m.typeSignature.resultType =:= tpe)
+    val companionMethods = tpe.companion.decls.filter(m => m.isMethod &&
+      m.isStatic &&
+      m.typeSignature.resultType =:= tpe &&
+      m.asMethod.paramLists.length > 0 &&
+      m.asMethod.paramLists.head.length > 0)
       .map(_.asMethod)
       .toList
     methods ++ companionMethods
