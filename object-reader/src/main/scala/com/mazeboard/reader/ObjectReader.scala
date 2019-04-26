@@ -175,7 +175,17 @@ abstract class ObjectReader[X](root: X) extends Dynamic {
       case constructor if constructor.isConstructor =>
         classMirror(tpe).reflectConstructor(constructor)(args: _*)
       case method =>
-        instanceMirror(tpe).reflectMethod(method)(args: _*)
+        try {
+          instanceMirror(tpe).reflectMethod(method)(args: _*)
+        } catch { // Scala reflection can't invoke Java static methods
+          case _: java.lang.ClassNotFoundException =>
+            val classz: Class[_] = currentMirror.runtimeClass(tpe.typeSymbol.asClass)
+            classz.getMethod(
+              method.name.decodedName.toString,
+              method.paramLists.flatMap(x => x)
+                .map(x => currentMirror.runtimeClass(x.typeSignature.typeSymbol.asClass)): _*)
+              .invoke(null, args: _*)
+        }
     }
   }
 
@@ -183,10 +193,16 @@ abstract class ObjectReader[X](root: X) extends Dynamic {
     currentMirror.reflectClass(tpe.typeSymbol.asClass)
   }
 
+  /*
+  Scala reflection can't invoke Java static methods
+  m.instance fails with java.lang.ClassNotFoundException: <class>$
+  the issue is that in scala the static module is suffixed by $
+   */
   private def instanceMirror(tpe: Type): InstanceMirror = {
     val sm = currentMirror.staticModule(tpe.typeSymbol.fullName)
-    val i = currentMirror.reflectModule(sm).instance
-    currentMirror.reflect(i)
+    val m = currentMirror.reflectModule(sm)
+    currentMirror.reflect(m.instance)
+
   }
 
   private def createInstance(tpe: Type, arg: (MethodSymbol) => AnyRef) = {

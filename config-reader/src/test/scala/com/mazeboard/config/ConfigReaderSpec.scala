@@ -20,6 +20,24 @@ class ConfigReaderSpec
 
   def testConfigReader() = {
 
+    // TODO add java.nio.file.Path
+    // TODO add java.util.regex.Pattern
+    // TODO add scala.util.matching.Regex
+    // TODO scala.math.BigDecimal and java.math.BigDecimal
+
+    //assert(configFromString("""{x: "234.123"}""").x[scala.math.BigDecimal].compareTo(scala.math.BigDecimal("234.123")) == 0)
+    //assert(configFromString("""{x: "234.123"}""").x[java.math.BigDecimal].compareTo(new java.math.BigDecimal("234.123")) == 0)
+
+    assert(configFromString("""{level: "HIGH"}""").level[Level] == Level.HIGH)
+
+    assert(configFromString("""{uuid: "123e4567-e89b-12d3-a456-556642440000"}""").uuid[java.util.UUID] == java.util.UUID.fromString("123e4567-e89b-12d3-a456-556642440000"))
+
+    assert(configFromString("""{file: "/tmp/foo.txt"}""").file[java.io.File] == new java.io.File("/tmp/foo.txt"))
+
+    assert(configFromString("""{x: "123456789"}""").x[scala.math.BigInt] == scala.math.BigInt(123456789))
+
+    assert(configFromString("""{x: "123456789"}""").x[java.math.BigInteger] == new java.math.BigInteger("123456789"))
+
     assert(configFromString("{x: foo}")[Foo] == Foo(3))
 
     assert(configFromString("{x: 1.0}").x[Option[Double]] == Some(1.0))
